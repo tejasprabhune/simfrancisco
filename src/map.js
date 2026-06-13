@@ -10,7 +10,7 @@
 import { COLORS, TIMING } from "./config.js";
 import { makeProjection, makeInside } from "./projection.js";
 
-const POP_MS = 480; // per-dot pop duration during reveal
+const POP_MS = 340; // per-dot pop duration during reveal
 
 const easeOutBack = (x) => {
   const c1 = 1.70158, c3 = c1 + 1;
@@ -157,23 +157,26 @@ export class SFMap {
     ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
     ctx.clearRect(0, 0, this.cssW, this.cssH);
 
-    // water
-    ctx.fillStyle = COLORS.water;
+    // water — subtle vertical gradient (lighter at the top) for depth
+    const wg = ctx.createLinearGradient(0, 0, 0, this.cssH);
+    wg.addColorStop(0, COLORS.waterTop || COLORS.water);
+    wg.addColorStop(1, COLORS.water);
+    ctx.fillStyle = wg;
     ctx.fillRect(0, 0, this.cssW, this.cssH);
 
     if (!this.proj || !this.landPath) return;
 
     // landmass with soft shadow + thin coastline
     ctx.save();
-    ctx.shadowColor = "rgba(43,52,64,0.16)";
-    ctx.shadowBlur = 26;
-    ctx.shadowOffsetY = 6;
+    ctx.shadowColor = withAlpha(COLORS.ink, 0.18);
+    ctx.shadowBlur = 28;
+    ctx.shadowOffsetY = 7;
     ctx.fillStyle = COLORS.land;
     ctx.fill(this.landPath);
     ctx.restore();
     ctx.lineJoin = "round";
     ctx.lineWidth = 1.4;
-    ctx.strokeStyle = "rgba(43,52,64,0.55)";
+    ctx.strokeStyle = withAlpha(COLORS.ink, 0.45);
     ctx.stroke(this.landPath);
 
     // clearing fade factor

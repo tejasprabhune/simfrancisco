@@ -4,9 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sim francisco — predict the city</title>
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%237758AB' d='M12 2l1.8 5L19 9l-5.2 2L12 16l-1.8-5L5 9l5.2-2z'/%3E%3C/svg%3E" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23141414' d='M12 2l1.8 5L19 9l-5.2 2L12 16l-1.8-5L5 9l5.2-2z'/%3E%3C/svg%3E" />
 
-  <!-- fonts: Pixelify Sans (title) · futura-pt (body, via Typekit) -->
+  <!-- fonts: Pixelify Sans (title) · Neue Haas Grotesk Display (body, via Typekit) -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&display=swap" rel="stylesheet" />
@@ -16,15 +16,24 @@
   <link rel="preconnect" href="https://sf-digital-twin-tp.fly.dev" />
 </head>
 <body>
-  <!-- the map fills the entire page -->
+  <!-- the pixel-art city fills the entire page -->
   <canvas id="map"></canvas>
 
   <div id="ui">
-    <!-- top-left: title (pixel font) -->
-    <div id="title" class="title"><span>sim</span> <span class="title-accent">francisco</span></div>
+    <!-- top-left: title (pixel font, all black) -->
+    <div id="title" class="title">sim francisco</div>
 
-    <!-- ambient status line (bottom-left) -->
-    <div id="status" class="status">san francisco</div>
+    <!-- simulation status: SF · residents · date, directly below the title -->
+    <div id="status" class="status">waking the city…</div>
+
+    <!-- return-to-overview button (visible only when zoomed in) -->
+    <button id="return" class="return hidden" aria-label="Return to the whole city">
+      <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+        <path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"
+              d="M15 5l-7 7 7 7" />
+      </svg>
+      <span>whole city</span>
+    </button>
 
     <!-- top-right: query summary + response progress -->
     <div id="summary" class="summary hidden" aria-live="polite">
@@ -36,20 +45,55 @@
       </div>
     </div>
 
-    <!-- bottom-center dock: result card expands above the "ask" bar -->
+    <!-- bottom-center dock: result card · composer row (ask + info) -->
     <div id="dock" class="dock">
       <div id="result-card" class="result-card hidden" role="dialog" aria-modal="false" aria-label="Prediction result"></div>
 
-      <div id="ask" class="ask" data-state="idle">
-        <svg class="ask-search" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
-          <circle cx="10.5" cy="10.5" r="6" fill="none" stroke="currentColor" stroke-width="2" />
-          <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M15 15l4.5 4.5" />
-        </svg>
-        <span id="ask-label" class="ask-label">ask</span>
-        <input id="ask-input" class="ask-input" type="text" autocomplete="off" spellcheck="false"
-               placeholder="predict anything" aria-label="Predict anything" />
-        <kbd class="ask-enter" aria-hidden="true">↵</kbd>
+      <div class="dock-row">
+        <div id="ask" class="ask" data-state="idle">
+          <svg class="ask-search" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+            <circle cx="10.5" cy="10.5" r="6" fill="none" stroke="currentColor" stroke-width="2" />
+            <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M15 15l4.5 4.5" />
+          </svg>
+          <span id="ask-label" class="ask-label">ask</span>
+          <textarea id="ask-input" class="ask-input" rows="1" autocomplete="off" spellcheck="false"
+                    placeholder="predict anything — e.g. will a Democrat win the 2026 California governor race?"
+                    aria-label="Predict anything"></textarea>
+          <kbd class="ask-enter" aria-hidden="true">↵</kbd>
+        </div>
+        <button id="info-btn" class="info-btn" aria-label="About sim francisco" title="About">?</button>
       </div>
+    </div>
+
+    <!-- about card (opened by the ? button) -->
+    <div id="about-scrim" class="about-scrim hidden"></div>
+    <div id="about" class="about hidden" role="dialog" aria-modal="true" aria-label="About sim francisco">
+      <button id="about-close" class="about-close" aria-label="Close">×</button>
+      <div class="about-title">sim francisco</div>
+      <div class="about-sub">simulate and predict our golden city and beyond</div>
+
+      <div class="about-h">The pitch</div>
+      <p>What if you could predict how your customers responded to releases before they went out into the real world? Or if you could get a signal on who will win an election?</p>
+      <p>We simulated the population of San Francisco distributed across real US Census data and achieved near-parity with these types of real-world events.</p>
+
+      <div class="about-h">Historically predictive</div>
+      <p>How do we know if our simulation of SF is accurate? We ran <b>GPT-4o</b> (oops, sorry — we had more GPT API credits to spawn thousands of simulated humans) with a knowledge cutoff of <b>October 2023</b> and queried the twin city to predict election results:</p>
+
+      <div class="about-ex">
+        <div class="about-ex-title"><i>2024 Presidency</i></div>
+        <div class="about-ex-q">In November 2024 do you vote for the Democratic presidential ticket (Harris) over the Republican (Trump)?</div>
+        <div class="about-ex-nums"><span class="actual">Actual: 83.8% Dem</span><span class="pred">Predicted: 81.3% Dem</span></div>
+      </div>
+
+      <div class="about-ex">
+        <div class="about-ex-title"><i>March 2024 · Proposition A</i></div>
+        <div class="about-ex-q">There's a measure on your March ballot, Proposition A, that would let the City borrow up to $300 million through general obligation bonds to build and preserve affordable housing — for low-income families, seniors, and working residents. It's backed by Mayor Breed and would need a two-thirds supermajority to pass. Are you voting yes or no?</div>
+        <div class="about-ex-nums"><span class="actual">Actual: 70.38% yes</span><span class="pred">Predicted: 70% yes</span></div>
+      </div>
+
+      <div class="about-h">The future</div>
+      <p>All of decision-making is predicated on our understanding of causality. How will the choices we make influence the world? How will people react?</p>
+      <p>To enable (first) SF, and then the world, to understand the causal nature of reality, we present <span class="about-name">sim francisco</span>.</p>
     </div>
 
     <div id="toast" class="toast hidden"></div>

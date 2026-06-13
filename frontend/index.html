@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SimFrancisco — predict the city</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%235B6CFF' d='M12 2l1.8 5L19 9l-5.2 2L12 16l-1.8-5L5 9l5.2-2z'/%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="preconnect" href="https://sf-digital-twin-tp.fly.dev" />
+</head>
+<body>
+  <!-- the map fills the entire page -->
+  <canvas id="map"></canvas>
+
+  <div id="ui">
+    <!-- top-left: the "magic AI" button -->
+    <button id="ai-btn" class="ai-btn" aria-label="Predict anything" title="Predict anything (⌘K)">
+      <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+        <path fill="currentColor" d="M12 2.5l1.7 4.6L18.3 9l-4.6 1.7L12 15.3l-1.7-4.6L5.7 9l4.6-1.9L12 2.5z"/>
+        <path fill="currentColor" d="M18.5 14.2l.85 2.3 2.3.85-2.3.85-.85 2.3-.85-2.3-2.3-.85 2.3-.85.85-2.3z"/>
+      </svg>
+    </button>
+
+    <!-- ambient status line -->
+    <div id="status" class="status">San Francisco</div>
+
+    <!-- top-right: query summary + response progress -->
+    <div id="summary" class="summary hidden" aria-live="polite">
+      <div id="summary-label" class="summary-label">PREDICTING</div>
+      <div id="summary-text" class="summary-text"></div>
+      <div id="progress" class="progress">
+        <div class="progress-track"><div id="progress-fill" class="progress-fill"></div></div>
+        <div id="progress-label" class="progress-label"></div>
+      </div>
+    </div>
+
+    <!-- centered spotlight: input mode + result mode -->
+    <div id="spotlight" class="spotlight-overlay hidden" role="dialog" aria-modal="true" aria-label="Predict anything">
+      <div class="spot-card">
+        <div id="spot-input-mode">
+          <div class="spot-row">
+            <svg class="spot-icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+              <path fill="currentColor" d="M12 2.5l1.7 4.6L18.3 9l-4.6 1.7L12 15.3l-1.7-4.6L5.7 9l4.6-1.9L12 2.5z"/>
+            </svg>
+            <input id="spot-input" type="text" autocomplete="off" spellcheck="false" placeholder="predict anything" />
+          </div>
+          <div class="spot-hint"><kbd>↵</kbd> poll the city &nbsp;·&nbsp; <kbd>esc</kbd> close</div>
+        </div>
+        <div id="spot-result-mode" class="hidden"></div>
+      </div>
+    </div>
+
+    <div id="toast" class="toast hidden"></div>
+  </div>
+
+  <script type="module" src="src/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,195 @@
+# rubric.yaml — machine-checkable "done" for the SF digital twin.
+# `cargo run --bin validate` runs every entry in `clean` mode at its as_of_date/model,
+# computes the metric, prints a scorecard, and exits 0 only if the weighted score
+# clears thresholds.weighted_score_min.
+#
+# All targets/outcomes are REAL public ground truth (sources in NOTES.md / INTEGRATION.md):
+#   - Elections/measures: SF Dept of Elections certified canvass, Nov 5 2024
+#     (514/514 precincts, certified 2024-12-03):
+#     https://www.sfelections.org/results/20241105/data/20241203/summary.pdf
+#   - Markets: Polymarket resolved events (CA 2024 Senate top-two primary, etc.)
+#   - GPT-4o knowledge cutoff is 2023-10 (per OpenAI docs), so 2024 outcomes cannot leak.
+# Targets are FIXED. Tuning may only touch persona generation, prompts, aggregation, and
+# the turnout model — never these targets or the validation slice.
+
+meta:
+  validation_n: 2000
+  default_seed: 42
+  ci_method: weighted_bootstrap
+  notes: "Markets weighted higher per team; headline market score uses sf_opinion_informative bucket only. Archetype-clustered polling with PUMS post-stratification."
+
+weights:
+  elections_measures: 1.0
+  resolved_markets_sf_informative: 1.5
+  resolved_markets_general: 0.0   # reported, never inflates headline
+  live_markets: 0.0               # demo agreement only, not truth
+  counterfactuals: 1.0
+
+thresholds:
+  weighted_score_min: 0.70
+  elections_measures_max_abs_err: 0.07
+  resolved_markets_max_brier: 0.18
+  counterfactual_direction_min: 0.80
+
+# ---- elections & ballot measures (ground truth = SF Dept of Elections certified canvass) ----
+elections_measures:
+  - id: sf_pres_2024_two_party_dem_share
+    as_of_date: "2024-11-04"
+    model: gpt-4o
+    population: cvap_likely_voter
+    question: "In the November 2024 U.S. presidential election, do you vote for the Democratic ticket (Kamala Harris / Tim Walz) rather than the Republican ticket (Donald Trump / JD Vance)?"
+    description: "A two-way choice between the Democratic and Republican presidential tickets. YES = vote Democratic. (Ignore third parties; this measures the two-party Democratic share.)"
+    target_share: 0.8380
+    tolerance: 0.05
+
+  - id: ca_prop_36_2024_penalties
+    as_of_date: "2024-11-04"
+    model: gpt-4o
+    population: cvap_likely_voter
+    question: "California Proposition 36 (2024): do you vote YES?"
+    description: "Increases criminal penalties for certain theft and drug crimes, including allowing felony charges and treatment-mandated felonies for repeat offenses (partially rolling back the 2014 Prop 47 reforms). Supporters cite frustration with retail theft and open-air drug markets; opponents (many criminal-justice reformers) say it revives failed war-on-drugs policies. Lived local context the voter would have, all predating this measure: San Francisco has had among the nation's highest property-crime and car-break-in rates; the Tenderloin and parts of SoMa had visible open-air drug markets; and SF voters recalled progressive District Attorney Chesa Boudin in June 2022 amid public-safety frustration. The city remains very Democratic, but by then public safety had become a top concern even for many progressives. YES = tougher penalties."
+    target_share: 0.6386
+    tolerance: 0.06
+
+  - id: ca_prop_6_2024_servitude
+    as_of_date: "2024-11-04"
+    model: gpt-4o
+    population: cvap_likely_voter
+    question: "California Proposition 6 (2024): do you vote YES?"
+    description: "Amends the state constitution to remove involuntary servitude (forced labor) as a permissible punishment for crime, ending mandatory prison labor. A criminal-justice-reform measure. YES = end forced prison labor."
+    target_share: 0.6687
+    tolerance: 0.06
+
+  - id: ca_prop_32_2024_min_wage
+    as_of_date: "2024-11-04"
+    model: gpt-4o
+    population: cvap_likely_voter
+    question: "California Proposition 32 (2024): do you vote YES?"
+    description: "Raises the state minimum wage to $18 per hour. Backed by labor; opposed by some business groups. YES = raise the minimum wage."
+    target_share: 0.7098
+    tolerance: 0.06
+
+  - id: ca_prop_33_2024_rent_control
+    as_of_date: "2024-11-04"
+    model: gpt-4o
+    population: cvap_likely_voter
+    question: "California Proposition 33 (2024): do you vote YES?"
+    description: "Repeals the Costa-Hawkins Act, expanding local governments' authority to enact rent control. Tenant groups back it; opponents (including many housing economists) argue it is poorly drafted and would reduce new housing supply. Historical prior the voter would know: this is the THIRD straight statewide rent-control ballot attempt — Proposition 10 (2018) and Proposition 21 (2020) both FAILED by wide margins statewide. YES = expand rent-control authority."
+    target_share: 0.4264
+    tolerance: 0.07
+
+  - id: sf_prop_K_2024_great_highway
+    as_of_date: "2024-11-04"
+    model: gpt-4o
+    population: cvap_likely_voter
+    question: "San Francisco Proposition K (2024): do you vote YES?"
+    description: "Permanently closes the Upper Great Highway (a ~2-mile coastal roadway along Ocean Beach) to private vehicles to create a public oceanfront park. Supported by park/cycling advocates; opposed by many westside/Sunset residents worried about traffic. YES = close the road and make a park."
+    target_share: 0.5473
+    tolerance: 0.07
+
+  - id: sf_prop_M_2024_business_tax
+    as_of_date: "2024-11-04"
+    model: gpt-4o
+    population: cvap_likely_voter
+    question: "San Francisco Proposition M (2024): do you vote YES?"
+    description: "Overhauls SF business taxes: shifts toward gross-receipts taxation, raises the small-business exemption to $5M, and simplifies tax classes. A business-and-labor-backed compromise to stabilize city revenue while cutting taxes for small firms. YES = adopt the tax overhaul."
+    target_share: 0.6951
+    tolerance: 0.07
+
+# ---- resolved prediction markets (Brier vs actual outcome). Polymarket. ----
+# Bucketed: sf_opinion_informative = resolved by the CA/SF electorate (panel is a valid
+# instrument); general_knowledge = Fed/margins (weak instrument, reported only).
+resolved_markets:
+  sf_opinion_informative:
+    - id: schiff_advance_2024_ca_senate
+      source: "polymarket: will-adam-schiff-advance-from-the-2024-ca-senate-primary"
+      as_of_date: "2023-10-01"
+      model: gpt-4o
+      question: "Will Adam Schiff finish in the top two of California's March 2024 U.S. Senate primary and advance to the November general election?"
+      description: "California uses a top-two primary: the two highest vote-getters advance regardless of party. As of late 2023, Rep. Adam Schiff (Democrat) was a leading, well-funded, nationally prominent candidate. Estimate the probability he advances."
+      outcome: 1
+
+    # NOTE: replaced the "Garvey advances" market — his March-2024 surge was not
+    # forecastable from GPT-4o's Oct-2023 knowledge horizon (he polled 4th–5th then), so it
+    # is a poor instrument for this model. Substituted a CA-electorate market that IS robustly
+    # forecastable from pre-cutoff information. See NOTES.md iter 2.
+    - id: dem_wins_ca_senate_2024
+      source: "polymarket: 2024 California U.S. Senate general (party winner)"
+      as_of_date: "2023-10-01"
+      model: gpt-4o
+      question: "Will a Democrat win California's 2024 U.S. Senate election (the seat formerly held by Dianne Feinstein)?"
+      description: "California elects its statewide officials by a wide Democratic margin and has not sent a Republican to the U.S. Senate since 1988. The leading 2024 candidates were Democrats (Adam Schiff, Katie Porter, Barbara Lee). Estimate the probability the eventual winner is a Democrat."
+      outcome: 1
+
+    - id: lee_advance_2024_ca_senate
+      source: "polymarket: will-barbara-lee-advance-from-the-2024-ca-senate-primary"
+      as_of_date: "2023-10-01"
+      model: gpt-4o
+      question: "Will Barbara Lee finish in the top two of California's March 2024 U.S. Senate primary and advance to the November general election?"
+      description: "California's top-two primary. As of late 2023, Rep. Barbara Lee trailed Schiff, Porter, and Garvey in most public polling for the open Senate seat, running fourth in a crowded field. Estimate the probability she advances."
+      outcome: 0
+
+  general_knowledge:            # reported only; panel is a weak instrument here
+    - id: fed_25bps_cut_sep_2025
+      source: "polymarket: fed-decreases-interest-rates-by-25-bps-after-september-2025-meeting"
+      as_of_date: "2025-09-01"
+      model: gpt-4o
+      question: "Will the U.S. Federal Reserve cut interest rates by 25 basis points at its September 2025 meeting?"
+      description: "A monetary-policy decision by the FOMC. General economic-knowledge question, not an SF-opinion signal."
+      outcome: 1
+
+    - id: harris_ca_win_by_25
+      source: "polymarket: will-harris-win-california-by-25-points"
+      as_of_date: "2024-10-26"
+      model: gpt-4o
+      question: "Will the Democratic presidential candidate win California by 25 or more percentage points in November 2024?"
+      description: "A margin-threshold question about statewide California results. A San Francisco panel systematically overestimates statewide Democratic margins, so this is a deliberately weak instrument (reported, not scored)."
+      outcome: 0
+
+# ---- live markets (open) — demo agreement metric, never counted as truth ----
+live_markets:
+  - id: newsom_2028_dem_nomination
+    source: "polymarket: will-gavin-newsom-win-the-2028-democratic-presidential-nomination-568"
+    as_of_date: today
+    model: gpt-5.5
+    bucket: sf_opinion_informative
+    note: "Open market; current price ~0.23 as of 2026-06. Used for demo agreement only."
+
+# ---- counterfactuals (direction + plausible magnitude). Events are described in-prompt;
+# as_of dates precede GPT-4o's cutoff to limit leakage. ----
+counterfactuals:
+  - id: cf_endorsement_raises_support
+    as_of_date: "2023-06-01"
+    model: gpt-4o
+    framing: vote
+    population: cvap_likely_voter
+    question: "Do you support a San Francisco ballot measure that funds expanded public transit and street-safety improvements through a modest new tax?"
+    description: "A local funding measure for transit and pedestrian/cyclist safety, paid for by a modest tax. YES = support."
+    event: "The Mayor, the SF Democratic Party, the transit-riders union, and major neighborhood groups all publicly endorse the measure, and a well-funded 'Yes' campaign blankets the city."
+    expected_direction: up
+    real_poll_delta: 0.08
+    magnitude_tolerance: 0.12
+
+  - id: cf_corruption_lowers_tax_support
+    as_of_date: "2023-05-01"
+    model: gpt-4o
+    framing: vote
+    population: cvap_likely_voter
+    question: "Do you support giving San Francisco city government a new general tax increase to expand its budget?"
+    description: "A measure that raises taxes to give City Hall more general revenue. YES = support the tax increase."
+    event: "A major corruption scandal breaks: senior City Hall officials are indicted for steering public contracts to friends and misusing tens of millions in public funds, dominating local news for weeks."
+    expected_direction: down
+    real_poll_delta: 0.10
+    magnitude_tolerance: 0.12
+
+  - id: cf_safety_incident_raises_policing
+    as_of_date: "2023-08-01"
+    model: gpt-4o
+    framing: vote
+    population: cvap_likely_voter
+    question: "Do you support increasing funding for more police officers in San Francisco?"
+    description: "A measure to increase police staffing and budget. YES = support more police funding."
+    event: "A series of widely-publicized violent robberies and a viral video of an organized retail-theft ransacking of a downtown store dominate the news, and several small businesses announce they are closing over safety concerns."
+    expected_direction: up
+    real_poll_delta: 0.09
+    magnitude_tolerance: 0.12

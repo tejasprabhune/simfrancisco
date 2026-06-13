@@ -1,0 +1,14 @@
+target
+.git
+data/pums
+runs
+cache.db
+state.db
+state.db-*
+*.db-wal
+*.db-shm
+.env
+*.env
+NOTES.md
+BRIEF.md
+.claude

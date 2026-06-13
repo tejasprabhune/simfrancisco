@@ -1,10 +1,10 @@
 // ─────────────────────────────────────────────────────────────────────────
-// SimFrancisco · simpler map frontend · orchestration
+// sim francisco · simpler map frontend · orchestration
 //
-// Flow:  idle → (AI button) → spotlight input → submit
-//        → branch + poll the electorate (waiting)
-//        → stochastic green/red reveal accumulates on the map
-//        → spotlight returns as a result card (distribution) → dismiss → idle
+// Flow:  idle → click "ask" (bottom-center) → bar expands to "predict anything"
+//        → submit → branch + poll the electorate (bar shows "predicting…")
+//        → stochastic green/red reveal accumulates on the map (progress top-right)
+//        → a result card expands above the bar (distribution) → dismiss → idle
 // ─────────────────────────────────────────────────────────────────────────
 
 import { SIM, PREDICT, TIMING } from "./config.js";
@@ -17,18 +17,18 @@ import * as api from "./api.js";
 const $ = (id) => document.getElementById(id);
 const els = {
   canvas: $("map"),
-  ai: $("ai-btn"),
   status: $("status"),
   summary: $("summary"),
-  summaryText: $("summary-text"),
   summaryLabel: $("summary-label"),
+  summaryText: $("summary-text"),
   progress: $("progress"),
   progressFill: $("progress-fill"),
   progressLabel: $("progress-label"),
-  spotlight: $("spotlight"),
-  inputMode: $("spot-input-mode"),
-  resultMode: $("spot-result-mode"),
-  input: $("spot-input"),
+  dock: $("dock"),
+  ask: $("ask"),
+  askInput: $("ask-input"),
+  askLabel: $("ask-label"),
+  resultCard: $("result-card"),
   toast: $("toast"),
 };
 
@@ -46,9 +46,19 @@ const state = {
   abort: null,       // AbortController for the in-flight prediction
 };
 
+const isBusy = () => state.phase === "waiting" || state.phase === "reveal";
+const inputOpen = () => els.ask.dataset.state === "input";
+
+// drive the bottom bar's three visual states (idle pill · input · busy)
+function setAsk(s) {
+  els.ask.dataset.state = s;
+  els.askLabel.textContent = s === "busy" ? "predicting…" : "ask";
+  document.body.classList.toggle("dock-active", s !== "idle"); // fades the ambient status out of the way
+}
+
 // Best-effort delete of the current prediction branch so each prediction owns
-// exactly one live branch on the backend (no orphans across "Ask another",
-// dismiss, cancel, or poll failure).
+// exactly one live branch on the backend (no orphans across ask-again, dismiss,
+// cancel, or poll failure).
 function cleanupBranch() {
   if (state.branchId) { api.deleteBranch(state.branchId); state.branchId = null; }
 }
@@ -57,7 +67,7 @@ function cleanupBranch() {
 async function boot() {
   map.setOutline(SF_OUTLINE);
   map.start();
-  els.status.textContent = "San Francisco · waking the city…";
+  els.status.textContent = "waking the city…";
   try {
     const sim = await api.createSimulation();
     state.simId = sim.simulation_id;
@@ -72,7 +82,7 @@ async function boot() {
     // Don't leave an empty map — scatter neutral dots inside the outline so the
     // city is still alive, and let the user know predictions are offline.
     map.setAgents(fallbackAgents(SIM.n));
-    els.status.textContent = "San Francisco · offline preview (backend unreachable)";
+    els.status.textContent = "offline preview · backend unreachable";
     toast("Couldn't reach the backend — showing an offline preview.");
     state.phase = "error";
   }
@@ -81,7 +91,7 @@ async function boot() {
 function setStatus(n) {
   const d = new Date(SIM.start_datetime);
   const date = d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
-  els.status.textContent = `San Francisco · ${n.toLocaleString()} residents · ${date}`;
+  els.status.textContent = `san francisco · ${n.toLocaleString()} residents · ${date}`;
 }
 
 // random points inside the outline, for the offline preview only
@@ -98,50 +108,55 @@ function fallbackAgents(n) {
   return out;
 }
 
-// ── spotlight ────────────────────────────────────────────────────────────
+// ── ask bar ────────────────────────────────────────────────────────────
 function openInput() {
-  if (state.phase === "waiting" || state.phase === "reveal") return;
+  if (isBusy()) return;
+  if (state.phase === "error" || !state.simId) {   // backend offline → don't open a dead input
+    toast("Predictions need the backend — it's currently unreachable.");
+    return;
+  }
   cleanupBranch();        // leaving any prior result → release its branch
   map.clearVerdicts();
   hide(els.summary);
-  hide(els.resultMode);
-  show(els.inputMode);
-  show(els.spotlight);
-  els.ai.classList.add("active");
+  hide(els.resultCard);
+  setAsk("input");
   state.phase = "idle";
-  requestAnimationFrame(() => { els.input.value = ""; els.input.focus(); });
+  requestAnimationFrame(() => { els.askInput.value = ""; els.askInput.focus(); });
 }
 
-function closeSpotlight() {
-  hide(els.spotlight);
-  els.ai.classList.remove("active");
+function closeInput() {
+  setAsk("idle");
+  els.askInput.value = "";
+  els.askInput.blur();
 }
 
 function dismissResults() {
-  closeSpotlight();
+  hide(els.resultCard);
   hide(els.summary);
   map.clearVerdicts();
   cleanupBranch();
+  setAsk("idle");
   state.phase = "idle";
 }
 
-// Cancel an in-flight prediction (Esc / AI button during waiting or reveal):
-// abort the network call, invalidate its async continuation, clean up, idle.
+// Cancel an in-flight prediction (Esc / clicking the busy bar): abort the
+// network call, invalidate its async continuation, clean up, return to idle.
 function cancelPrediction() {
   state.reqId++;                                   // stale-out the running runPrediction
   if (state.abort) { state.abort.abort(); state.abort = null; }
   map.onProgress = null; map.onRevealComplete = null;
-  els.ai.classList.remove("busy");
   els.progress.classList.remove("indeterminate");
   hide(els.summary);
+  hide(els.resultCard);
   map.clearVerdicts();
   cleanupBranch();
+  setAsk("idle");
   state.phase = "idle";
 }
 
 // ── prediction flow ───────────────────────────────────────────────────────
 async function runPrediction(question) {
-  question = question.trim();
+  question = (question || "").trim();
   if (!question) return;
   if (state.phase === "error" || !state.simId) {
     toast("Predictions need the backend — it's currently unreachable.");
@@ -153,10 +168,11 @@ async function runPrediction(question) {
   state.abort = new AbortController();
   const signal = state.abort.signal;
   state.phase = "waiting";
-  closeSpotlight();
+  setAsk("busy");
+  els.askInput.blur();
 
-  // top-right: the "summary" (the question itself — a backend summarize call
-  // would slot in here) + an indeterminate progress bar beneath it
+  // top-right: the query "summary" (the question itself — a backend summarize
+  // call would slot in here) + a progress bar beneath it
   els.summaryLabel.textContent = "PREDICTING";
   els.summaryText.textContent = question;
   els.progressFill.style.width = "18%";
@@ -164,7 +180,6 @@ async function runPrediction(question) {
   els.progressLabel.textContent = "tallying the electorate… (esc to cancel)";
   show(els.summary);
   map.setWaiting();
-  els.ai.classList.add("busy");
 
   const framing = /\b(will|won't|by \d{4}|going to)\b/i.test(question) ||
     /^(will|is|are|does|can|could|would)\b/i.test(question) ? "belief" : "vote";
@@ -176,7 +191,10 @@ async function runPrediction(question) {
       name: "predict",
       signal,
     });
-    if (myReq !== state.reqId) return;   // cancelled / superseded
+    if (myReq !== state.reqId) {          // cancelled / superseded mid-create
+      api.deleteBranch(branch.branch_id); // release the branch we just made (id not yet stored)
+      return;
+    }
     state.branchId = branch.branch_id;
 
     // 2) poll the synthetic electorate (the slow LLM pass)
@@ -195,7 +213,7 @@ async function runPrediction(question) {
     els.progress.classList.remove("indeterminate");
     els.progressLabel.textContent = `0 / ${map.agents.length.toLocaleString()} responses`;
     map.onProgress = onRevealProgress;
-    map.onRevealComplete = () => showResults(state.lastResult);
+    map.onRevealComplete = () => { if (myReq === state.reqId) showResults(state.lastResult); };
     state.phase = "reveal";
     map.startReveal(verdicts, TIMING.revealMs);
   } catch (err) {
@@ -204,8 +222,8 @@ async function runPrediction(question) {
     toast(`Poll failed: ${err.message}`);
     hide(els.summary);
     els.progress.classList.remove("indeterminate");
-    els.ai.classList.remove("busy");
     cleanupBranch();                     // don't orphan the branch we just created
+    setAsk("idle");
     state.phase = "idle";
   }
 }
@@ -216,13 +234,13 @@ function onRevealProgress(done, total) {
   els.progressLabel.textContent = `${done.toLocaleString()} / ${total.toLocaleString()} responses`;
 }
 
-// ── result card ────────────────────────────────────────────────────────────
+// ── result card (expands above the ask bar) ─────────────────────────────────
 function showResults(result) {
   state.phase = "results";
-  els.ai.classList.remove("busy");
-  els.summaryLabel.textContent = "RESULT";
+  setAsk("idle");
   els.progressFill.style.width = "100%";
-  els.progressLabel.textContent = `${map.agents.length.toLocaleString()} responses · complete`;
+  hide(els.summary);                     // the card below now carries everything
+  clearTimeout(toastTimer); hide(els.toast); // a stale error toast must not overlap the card
 
   const pct = Math.round((result.p_yes ?? 0) * 100);
   const noPct = 100 - pct;
@@ -232,7 +250,7 @@ function showResults(result) {
   const n = result.n_agents ?? map.agents.length;
   const rationales = (result.sample_rationales || []).slice(0, 3);
 
-  els.resultMode.innerHTML = `
+  els.resultCard.innerHTML = `
     <div class="res-q">${escapeHtml(result.question || "")}</div>
     <div class="res-headline">
       <span class="res-pct">${pct}<span class="res-pct-sym">%</span></span>
@@ -256,9 +274,7 @@ function showResults(result) {
       <button id="res-dismiss" class="btn">Dismiss</button>
     </div>
   `;
-  hide(els.inputMode);
-  show(els.resultMode);
-  show(els.spotlight);
+  show(els.resultCard);
   const again = $("res-again");
   again.addEventListener("click", openInput);
   $("res-dismiss").addEventListener("click", dismissResults);
@@ -279,40 +295,34 @@ function escapeHtml(s) {
     ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 }
 
-// ── events ───────────────────────────────────────────────────────────────
-const spotlightHidden = () => els.spotlight.classList.contains("hidden");
-const isBusy = () => state.phase === "waiting" || state.phase === "reveal";
 const typingTarget = (el) =>
   el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.isContentEditable);
 
-els.ai.addEventListener("click", () => {
-  if (isBusy()) cancelPrediction();              // busy → clicking the button cancels
-  else if (state.phase === "results") dismissResults();
-  else if (spotlightHidden()) openInput();
-  else closeSpotlight();
+// ── events ───────────────────────────────────────────────────────────────
+els.ask.addEventListener("click", () => {
+  if (isBusy()) { cancelPrediction(); return; }   // clicking the busy bar cancels
+  if (inputOpen()) { els.askInput.focus(); return; }
+  openInput();                                     // idle or results → open input
 });
 
-els.input.addEventListener("keydown", (e) => {
-  if (e.key === "Enter") { e.preventDefault(); runPrediction(els.input.value); }
+els.askInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") { e.preventDefault(); runPrediction(els.askInput.value); }
 });
 
-els.spotlight.addEventListener("mousedown", (e) => {
-  if (e.target === els.spotlight) {
-    if (state.phase === "results") dismissResults();
-    else closeSpotlight();
-  }
+// click outside the dock collapses an open input
+document.addEventListener("mousedown", (e) => {
+  if (inputOpen() && !els.dock.contains(e.target)) closeInput();
 });
 
 document.addEventListener("keydown", (e) => {
   if (e.key === "Escape") {
-    if (isBusy()) cancelPrediction();            // cancel the in-flight poll/reveal
-    else if (!spotlightHidden()) {
-      state.phase === "results" ? dismissResults() : closeSpotlight();
-    }
+    if (isBusy()) cancelPrediction();              // cancel the in-flight poll/reveal
+    else if (state.phase === "results") dismissResults();
+    else if (inputOpen()) closeInput();
   } else if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
     e.preventDefault();
-    if (spotlightHidden() && !isBusy()) openInput();
-  } else if (e.key === "/" && spotlightHidden() && !isBusy() && !typingTarget(document.activeElement)) {
+    if (!isBusy() && !inputOpen()) openInput();
+  } else if (e.key === "/" && !isBusy() && !inputOpen() && !typingTarget(document.activeElement)) {
     e.preventDefault();
     openInput();
   }

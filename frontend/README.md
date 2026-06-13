@@ -8,6 +8,10 @@ This is the **simpler** of the two frontends: a real SF outline (no pixel art,
 no zoom), with stochastic per-dot poll results. It talks directly to the
 deployed backend (`https://sf-digital-twin-tp.fly.dev`) — see `../INTEGRATION.md`.
 
+Glassmorphic chrome over a painted map. The palette is sampled from the project's
+pixel-art palette image (warm sand land, pale-blue bay, violet accent, green/red
+verdicts). Title in **Pixelify Sans**; body in **futura-pt** (Typekit).
+
 ## Run
 
 No build, no install. Serve the folder over HTTP (ES modules need `http://`, not
@@ -24,13 +28,14 @@ or `npx serve -l 5173` / any static server.
 ## Use
 
 - The map fills the page and shows ~1,200 real synthetic residents as dots.
-- Click the **✦ button** (top-left), or press **⌘K** / **/**, to open the
-  Spotlight. Type a question (e.g. *"Do you support more public transit
-  funding?"*) and hit **↵**.
+- Click the **⌕ ask** bar (bottom-center), or press **⌘K** / **/**. It expands
+  horizontally into a **"predict anything"** textbox. Type a question (e.g. *"Do
+  you support more public transit funding?"*) and hit **↵**.
 - The query summary + a live response progress bar appear top-right; green/red
   verdicts accumulate across the map into a poll-map distribution.
-- When complete, the Spotlight returns with the result distribution. **Dismiss**
-  to clear, or **Ask another** to run a new prediction. **Esc** closes.
+- When complete, a **result card expands above the bar** with the distribution.
+  **Dismiss** to clear, or **Ask another** to run a new prediction. **Esc**
+  cancels an in-flight poll or dismisses; clicking the busy bar also cancels.
 
 ## How it maps to the backend
 
@@ -52,8 +57,8 @@ backend adds a summarize endpoint, it slots into `runPrediction()` in
 ## Files
 
 ```
-index.html          page shell + UI overlay
-styles.css          Fog & Bay palette, frosted-glass chrome
+index.html          page shell + UI overlay (Pixelify title, bottom "ask" dock)
+styles.css          palette + glassmorphic chrome (snappy motion)
 src/config.js       backend URL, sim params, palette, timings
 src/api.js          backend client (fetch + timeouts)
 src/projection.js   lon/lat → screen + point-in-polygon

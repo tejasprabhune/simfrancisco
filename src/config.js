@@ -5,21 +5,22 @@
 // Backend (see ../INTEGRATION.md). CORS is wide-open, so browser fetch works.
 export const BASE = "https://sf-digital-twin-tp.fly.dev";
 
-// Synthetic population to spin up on load. n>=~1200 keeps demographics in
-// tolerance and gives a lively crowd of sprites on the map.
+// Synthetic population to spin up on load. 5,000 agents → a denser, more diverse
+// crowd; poll latency stays bounded because agents are clustered into ≤160 archetypes
+// before the LLM is called, so the call count (not N) sets the wait.
 export const SIM = {
-  n: 1200,
+  n: 5000,
   seed: 42,
   start_datetime: "2026-06-13T08:00:00Z",
   tick_seconds: 30,
 };
 
-// Per-prediction branch + poll defaults. Model is GPT-5.5 (current-events capable);
-// as_of_date is "today" so it reasons about live markets.
+// Per-prediction branch + poll defaults. Model is Claude Sonnet 4.6 (current-events
+// capable); as_of_date is "today" so it reasons about live markets.
 export const PREDICT = {
   branch_ticks: 2,
   as_of_date: "2026-06-13",
-  model: "gpt-5.5",
+  model: "claude-sonnet-4-6",
 };
 
 // Animation timing (ms).

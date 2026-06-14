@@ -44,7 +44,7 @@ export const createSimulation = (overrides = {}) =>
 // Page through every alive agent on a branch. Returns [{id, name, lonlat, values, ...}].
 // `cap` is only a runaway guard; the real bound is the branch's total_matched,
 // which we learn from the first page — so we never silently drop agents.
-export async function getAllAgents(branchId, cap = 50000) {
+export async function getAllAgents(branchId, onProgress, cap = 50000) {
   const limit = 1000;
   let offset = 0;
   const out = [];
@@ -54,6 +54,7 @@ export async function getAllAgents(branchId, cap = 50000) {
     out.push(...batch);
     const total = page.total_matched ?? out.length;
     offset += limit;
+    if (onProgress) onProgress(out.length, total);
     if (out.length >= total || batch.length < limit) break;
   }
   return out;

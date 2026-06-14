@@ -18,6 +18,8 @@ const $ = (id) => document.getElementById(id);
 const els = {
   canvas: $("map"),
   status: $("status"),
+  boot: $("boot"),
+  bootFill: $("boot-fill"),
   returnBtn: $("return"),
   summary: $("summary"),
   summaryLabel: $("summary-label"),
@@ -61,22 +63,33 @@ function cleanupBranch() {
 }
 
 // ── boot ───────────────────────────────────────────────────────────────
+// 0 → 1 progress on the thin boot bar. createSim is one slow step (~0.2); the
+// agent fetch is paged, so it fills the rest (0.2 → 0.97) as residents arrive.
+function setBoot(p) { els.bootFill.style.width = `${Math.round(Math.max(0, Math.min(1, p)) * 100)}%`; }
+
 async function boot() {
   map.onZoomChange = (zoomedIn) => { zoomedIn ? show(els.returnBtn) : hide(els.returnBtn); };
   map.start();
   els.status.textContent = "waking the city…";
+  show(els.boot); setBoot(0.06);
   try {
     const sim = await api.createSimulation();
     state.simId = sim.simulation_id;
     state.mainBranch = sim.main_branch;
-    const agents = await api.getAllAgents(state.mainBranch);
+    setBoot(0.2);
+    const agents = await api.getAllAgents(state.mainBranch, (loaded, total) => {
+      setBoot(0.2 + 0.77 * (total ? loaded / total : 0));
+    });
     if (!agents.length) throw new Error("no agents returned");
     map.setAgents(agents);
     state.residents = agents.length;
+    setBoot(1);
+    setTimeout(() => hide(els.boot), 450);       // let the bar finish, then fade out
     setIdleStatus();
     state.phase = "idle";
   } catch (err) {
     console.error(err);
+    hide(els.boot);
     map.setAgents(fallbackAgents(SIM.n));        // never leave an empty city
     els.status.textContent = "offline preview · backend unreachable";
     toast("Couldn't reach the backend — showing an offline preview.");

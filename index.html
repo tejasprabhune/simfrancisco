@@ -23,8 +23,13 @@
     <!-- top-left: title (pixel font, all black) -->
     <div id="title" class="title">sim francisco</div>
 
-    <!-- simulation status: SF · residents · date, directly below the title -->
+    <!-- simulation status: SF · residents · date (top-right) -->
     <div id="status" class="status">waking the city…</div>
+
+    <!-- boot progress: a thin line that fills while the city wakes -->
+    <div id="boot" class="boot hidden" aria-hidden="true">
+      <div class="boot-track"><div id="boot-fill" class="boot-fill"></div></div>
+    </div>
 
     <!-- return-to-overview button (visible only when zoomed in) -->
     <button id="return" class="return hidden" aria-label="Return to the whole city">

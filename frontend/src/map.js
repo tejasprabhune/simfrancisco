@@ -25,25 +25,81 @@ const WALK_FPS = 8;
 const SPRITE_WORLD = 22;        // sprite footprint in world px (~one 2 m cell ×~)
 
 // Pokémon-style thought bubbles (shown when zoomed in)
-const BUBBLE = { maxAtOnce: 7, sep: 165, cycleMs: 2600, font: '600 11px "neue-haas-grotesk-display", -apple-system, sans-serif', maxW: 150 };
-// short persona thoughts keyed by the agent's dominant issue salience (real backend value vector)
-const THOUGHTS = {
-  s_housing:     ["rent is brutal here", "we need more housing", "another rent hike…", "priced out again"],
-  s_crime:       ["is it safe to walk home?", "another car break-in", "tired of the break-ins", "where are the cops?"],
-  s_homeless:    ["the city has to help folks outside", "so many tents lately", "this isn't working"],
-  s_cost:        ["everything's so expensive", "groceries cost a fortune", "two jobs and still broke"],
-  s_environment: ["gotta bike more", "spare-the-air day", "love these foggy mornings", "save the coast"],
-  s_immigration: ["thinking of family back home", "finally getting my papers", "new to the city"],
-};
+const BUBBLE = { maxAtOnce: 7, sep: 165, cycleMs: 2600, font: '600 11px "neue-haas-grotesk-display", -apple-system, sans-serif', maxW: 156 };
 const easeOutBack = (x) => { const c1 = 1.70158, c3 = c1 + 1; return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2); };
 
-function ambientThought(values, id) {
-  if (!values) return "just another day in the city";
-  const keys = ["s_housing", "s_crime", "s_homeless", "s_cost", "s_environment", "s_immigration"];
-  let best = keys[0], bv = -Infinity;
-  for (const k of keys) { const v = values[k] ?? 0; if (v > bv) { bv = v; best = k; } }
-  const arr = THOUGHTS[best];
-  return arr[(id >>> 0) % arr.length];
+// ── diverse persona thoughts ────────────────────────────────────────────────
+// Each agent's bubble is drawn from its FULL backend persona (value vector +
+// demographics + neighborhood), mixing five modes so 1,200 residents read as
+// 1,200 distinct people rather than one repeated complaint.
+const ISSUE = {
+  s_housing:     ["rent is brutal here", "we need more housing", "another rent hike…", "priced out again", "saving for a place feels hopeless", "three roommates and counting", "my landlord won't fix anything", "just build more homes"],
+  s_crime:       ["is it safe to walk home?", "another car break-in", "tired of the break-ins", "where are the cops?", "they took my catalytic converter", "feels less safe lately", "lock your doors out here", "we need real public safety"],
+  s_homeless:    ["the city has to help folks outside", "so many tents lately", "this isn't working", "we need more shelters", "compassion, not sweeps", "it breaks my heart", "where's the housing-first plan?", "everyone deserves a roof"],
+  s_cost:        ["everything's so expensive", "groceries cost a fortune", "two jobs and still broke", "$18 for a sandwich?!", "this city eats your paycheck", "can I even afford to stay?", "wages haven't kept up", "another surprise fee"],
+  s_environment: ["gotta bike more", "spare-the-air day today", "love these foggy mornings", "save the coast", "more bike lanes please", "ditching the car", "the bay needs protecting", "compost, recycle, repeat"],
+  s_immigration: ["thinking of family back home", "finally getting my papers", "still new to the city", "sending money home", "learning the ropes here", "proud to be here", "my kids will have it better", "two cultures, one home"],
+};
+const DAILY = ["where's the fog today?", "Muni's late again", "need more coffee", "should've worn a jacket", "these hills are killer", "best burrito spot nearby", "is it Friday yet?", "another Zoom call", "weekend can't come soon", "great day by the bay", "missing the sunshine", "what's for dinner?", "parking is impossible", "love this city honestly", "tourists everywhere today", "the sourdough here though", "Karl the Fog is back", "my feet are killing me", "gotta call mom back", "Giants game tonight?", "off to yoga", "walking the dog", "late for the bus", "dreaming of a burrito"];
+const POL = {
+  prog:  ["the city should do more", "housing is a human right", "tax the rich already", "fund the schools", "we can do better than this"],
+  mod:   ["city hall wastes our money", "enough with the spending", "just want it to work", "common sense, please", "fix the basics first"],
+  notrust:["politicians never listen", "nothing changes around here", "same old at city hall", "who's actually in charge?"],
+  change:["time for something new", "we need real change", "shake things up", "out with the old"],
+};
+const HOOD = [
+  [/Bayview|Hunters/i, ["the city forgets us out here", "Third Street's home", "we deserve investment too"]],
+  [/Richmond|Presidio/i, ["dim sum on Clement after this", "foggy and green out here", "the avenues are peaceful"]],
+  [/Chinatown|North Beach|Russian/i, ["best dumplings are right here", "espresso in North Beach", "the alleys tell stories"]],
+  [/SoMa/i, ["so many empty offices now", "the commute's brutal", "construction everywhere"]],
+  [/Mission/i, ["best tacos in the city", "another mural going up", "the Mission's changing fast"]],
+  [/Bernal|central/i, ["the view from the hill", "village vibes up here", "quiet little corner"]],
+  [/Sunset/i, ["the fog never lifts out here", "the ocean's right there", "quiet in the avenues"]],
+  [/Ingleside|Oceanview/i, ["quiet side of town", "City College's right here", "underrated neighborhood"]],
+  [/Marina|Western Addition/i, ["perfect day by the bay", "brunch by the water", "jog along the marina"]],
+];
+const YOUNG = ["rent eats my whole check", "trying to make it here", "first apartment grind", "building a life here"];
+const OLD = ["this city's changed so much", "miss the old San Francisco", "watching it all change", "lived here 40 years"];
+
+function mulberry32(a) { return function () { a |= 0; a = (a + 0x6d2b79f5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
+const pickFrom = (rng, arr) => arr[(rng() * arr.length) | 0];
+
+function makeThought(a, id) {
+  const rng = mulberry32((id >>> 0) * 2654435761 + 12345);
+  const v = a.values || {};
+  const age = a.age || 40;
+  const hood = a.neighborhood || a.hood || "";
+  // weighted mode choice: issues dominate but daily life + flavor keep it varied
+  const r = rng();
+  if (r < 0.40) {
+    // weighted-random issue (not argmax) so the same person isn't always on rent
+    const keys = ["s_housing", "s_crime", "s_homeless", "s_cost", "s_environment", "s_immigration"];
+    const weights = keys.map((k) => Math.max(0.05, (v[k] ?? 0.4)) ** 2);
+    let tot = weights.reduce((s, w) => s + w, 0), x = rng() * tot, pick = keys[0];
+    for (let i = 0; i < keys.length; i++) { x -= weights[i]; if (x <= 0) { pick = keys[i]; break; } }
+    return pickFrom(rng, ISSUE[pick]);
+  }
+  if (r < 0.68) return pickFrom(rng, DAILY);
+  if (r < 0.82) {
+    if (age < 28 && rng() < 0.6) return pickFrom(rng, YOUNG);
+    if (age > 64 && rng() < 0.6) return pickFrom(rng, OLD);
+  }
+  if (r < 0.90) {
+    for (const [re, arr] of HOOD) if (re.test(hood)) return pickFrom(rng, arr);
+    return pickFrom(rng, DAILY);
+  }
+  // political mood from the value vector
+  const soc = v.social ?? 0, trust = v.trust ?? 0, change = v.change ?? 0;
+  if (trust < -0.25 && rng() < 0.5) return pickFrom(rng, POL.notrust);
+  if (change > 0.3 && rng() < 0.5) return pickFrom(rng, POL.change);
+  return pickFrom(rng, soc < -0.2 ? POL.prog : POL.mod);
+}
+
+const REACT_YES = ["I'm a yes on this", "voting yes for sure", "yeah, count me in", "this gets my vote", "yes — about time", "leaning yes", "makes sense to me", "finally, yes"];
+const REACT_NO = ["hard no for me", "I'm voting no", "no way", "not convinced", "this is a no", "leaning no", "not buying it", "nope, not this"];
+function verdictReaction(verdict, id) {
+  const rng = mulberry32((id >>> 0) * 40503 + 7);
+  return pickFrom(rng, verdict === "yes" ? REACT_YES : REACT_NO);
 }
 const clamp01 = (x) => (x < 0 ? 0 : x > 1 ? 1 : x);
 const lerp = (a, b, t) => a + (b - a) * t;
@@ -123,8 +179,9 @@ export class SFMap {
           ang, speed: 5 + Math.random() * 9, // world px/sec
           turnClock: Math.random() * 2.5,
           verdict: null, activateAt: 0,
-          thought: ambientThought(a.values, a.id ?? i),   // persona thought (backend value vector)
-          rationale: null,                                  // set from a poll's sample_rationales
+          seed: a.id ?? i,
+          thought: makeThought(a, a.id ?? i),   // diverse persona thought (backend value vector + demographics)
+          rationale: null,                       // set from a poll's sample_rationales
         };
       });
   }
@@ -412,12 +469,19 @@ export class SFMap {
   _drawBubbles() {
     if (!this.bubbleIdx.length) return;
     const ctx = this.ctx;
-    const showRat = this.mode === "reveal" || this.mode === "results";
+    const showVerdict = this.mode === "reveal" || this.mode === "results";
     const drawPx = Math.max(3, SPRITE_WORLD * this.cam.zoom);
     for (const i of this.bubbleIdx) {
       const a = this.agents[i];
       if (!a) continue;
-      const text = (showRat && a.rationale) ? a.rationale : a.thought;
+      let text;
+      if (showVerdict && a.verdict) {
+        // ~40% surface a real backend rationale; the rest show a varied stance line
+        const useReal = a.rationale && ((a.seed >>> 0) % 5) < 2;
+        text = useReal ? a.rationale : verdictReaction(a.verdict, a.seed);
+      } else {
+        text = a.thought;
+      }
       if (!text) continue;
       const s = this.worldToScreen(a.wx, a.wy);
       this._drawBubble(ctx, s.x, s.y - drawPx - 5, text);

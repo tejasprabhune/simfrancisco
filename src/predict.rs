@@ -56,7 +56,9 @@ pub struct Poll {
 
 impl Poll {
     pub fn model(&self) -> Model {
-        Model::parse(self.model.as_deref().unwrap_or("gpt-4o"))
+        // Live default is Claude Sonnet; the rubric pins gpt-4o per entry for the
+        // leakage-free 2024 backtest (a later-cutoff model would recall those results).
+        Model::parse(self.model.as_deref().unwrap_or("claude-sonnet-4-6"))
     }
     pub fn pop(&self) -> Population0 {
         match self.population.as_deref() {

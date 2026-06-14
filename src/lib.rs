@@ -26,9 +26,11 @@ pub mod api;
 /// Re-exports for binaries and tests.
 pub use model::{Cache, Model, ModelClient};
 
-/// Load `.env` into the process environment (only vars not already set). No external
-/// crate; tolerant of `KEY=VALUE` and comment/blank lines. fly.io injects secrets as
-/// real env vars, so this is a no-op there.
+/// Load `.env` into the process environment. The `.env` file is the project's config
+/// source of truth, so a present `.env` value OVERRIDES any inherited shell env var
+/// (otherwise a stray system-wide `ANTHROPIC_API_KEY`/`MODEL_API_KEY` would silently
+/// shadow the project key). fly.io has no `.env` file in the image, so this is a no-op
+/// there and the fly secrets are used. No external crate; tolerant of comments/blanks.
 pub fn load_dotenv(path: &str) {
     if let Ok(text) = std::fs::read_to_string(path) {
         for line in text.lines() {
@@ -39,8 +41,8 @@ pub fn load_dotenv(path: &str) {
             if let Some((k, v)) = line.split_once('=') {
                 let k = k.trim();
                 let v = v.trim().trim_matches('"').trim_matches('\'');
-                if std::env::var(k).is_err() {
-                    std::env::set_var(k, v);
+                if !v.is_empty() {
+                    std::env::set_var(k, v); // .env wins over inherited shell env
                 }
             }
         }

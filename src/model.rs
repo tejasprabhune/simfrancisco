@@ -20,11 +20,19 @@ use anyhow::{anyhow, Context, Result};
 use serde_json::{json, Value};
 use tokio::sync::Semaphore;
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Provider {
+    AzureResponses, // gpt-4o / gpt-5.5  → POST /responses
+    AzureChat,      // grok-4.3          → POST /chat/completions
+    Anthropic,      // claude-sonnet-*   → POST /v1/messages (x-api-key)
+}
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub enum Model {
     Gpt4o,
     Gpt55,
     Grok43,
+    Sonnet,
 }
 
 impl Model {
@@ -33,17 +41,26 @@ impl Model {
             Model::Gpt4o => "gpt-4o",
             Model::Gpt55 => "gpt-5.5",
             Model::Grok43 => "grok-4.3",
+            Model::Sonnet => "claude-sonnet-4-6",
+        }
+    }
+    pub fn provider(&self) -> Provider {
+        match self {
+            Model::Gpt4o | Model::Gpt55 => Provider::AzureResponses,
+            Model::Grok43 => Provider::AzureChat,
+            Model::Sonnet => Provider::Anthropic,
         }
     }
     /// gpt-4o / gpt-5.5 use the /responses shape; grok-4.3 uses /chat/completions.
     pub fn uses_responses(&self) -> bool {
-        matches!(self, Model::Gpt4o | Model::Gpt55)
+        self.provider() == Provider::AzureResponses
     }
     pub fn parse(s: &str) -> Model {
         match s.trim().to_ascii_lowercase().as_str() {
             "gpt-4o" | "gpt4o" | "4o" => Model::Gpt4o,
             "gpt-5.5" | "gpt55" | "gpt-55" | "5.5" => Model::Gpt55,
             "grok-4.3" | "grok" | "grok43" => Model::Grok43,
+            s if s.starts_with("claude") || s == "sonnet" => Model::Sonnet,
             _ => Model::Gpt4o,
         }
     }
@@ -127,6 +144,8 @@ pub struct ModelClient {
     http: reqwest::Client,
     base: String,
     api_key: String,
+    anthropic_key: String,
+    anthropic_url: String,
     sem: Arc<Semaphore>,
     max_retries: u32,
     cache: Option<Arc<Cache>>,
@@ -152,14 +171,19 @@ impl ModelClient {
             .and_then(|v| v.parse().ok())
             .unwrap_or(8);
         let offline = std::env::var("MODEL_OFFLINE").map(|v| v == "1").unwrap_or(false);
+        let anthropic_key = std::env::var("ANTHROPIC_API_KEY").unwrap_or_default();
+        let anthropic_url = std::env::var("ANTHROPIC_API_URL")
+            .unwrap_or_else(|_| "https://api.anthropic.com/v1/messages".to_string());
         let http = reqwest::Client::builder()
-            .timeout(Duration::from_secs(120))
+            .timeout(Duration::from_secs(180))
             .connect_timeout(Duration::from_secs(15))
             .build()?;
         Ok(ModelClient {
             http,
             base,
             api_key,
+            anthropic_key,
+            anthropic_url,
             sem: Arc::new(Semaphore::new(max_inflight)),
             max_retries: 5,
             cache,
@@ -169,7 +193,7 @@ impl ModelClient {
     }
 
     pub fn has_key(&self) -> bool {
-        !self.api_key.is_empty()
+        !self.api_key.is_empty() || !self.anthropic_key.is_empty()
     }
 
     fn cache_key(model: Model, system: &str, user: &str, max_tokens: u32) -> String {
@@ -204,7 +228,11 @@ impl ModelClient {
         if self.offline {
             return Err(anyhow!("offline mode: cache miss for {}", model.id()));
         }
-        if self.api_key.is_empty() {
+        if model.provider() == Provider::Anthropic {
+            if self.anthropic_key.is_empty() {
+                return Err(anyhow!("ANTHROPIC_API_KEY not set"));
+            }
+        } else if self.api_key.is_empty() {
             return Err(anyhow!("MODEL_API_KEY not set"));
         }
         let text = self.call_live(model, system, user, max_tokens).await?;
@@ -222,44 +250,57 @@ impl ModelClient {
         max_tokens: u32,
     ) -> Result<String> {
         let _permit = self.sem.acquire().await.unwrap();
-        let (url, body) = if model.uses_responses() {
-            let input = if system.is_empty() {
-                user.to_string()
-            } else {
-                format!("{system}\n\n{user}")
-            };
-            (
-                format!("{}/responses", self.base),
-                json!({ "model": model.id(), "input": input, "max_output_tokens": max_tokens.max(16) }),
-            )
-        } else {
-            let mut messages = Vec::new();
-            if !system.is_empty() {
-                messages.push(json!({"role":"system","content":system}));
+        let provider = model.provider();
+        let (url, body) = match provider {
+            Provider::AzureResponses => {
+                let input = if system.is_empty() { user.to_string() } else { format!("{system}\n\n{user}") };
+                (
+                    format!("{}/responses", self.base),
+                    json!({ "model": model.id(), "input": input, "max_output_tokens": max_tokens.max(16) }),
+                )
             }
-            messages.push(json!({"role":"user","content":user}));
-            (
-                format!("{}/chat/completions", self.base),
-                json!({ "model": model.id(), "messages": messages, "max_tokens": max_tokens.max(16) }),
-            )
+            Provider::AzureChat => {
+                let mut messages = Vec::new();
+                if !system.is_empty() { messages.push(json!({"role":"system","content":system})); }
+                messages.push(json!({"role":"user","content":user}));
+                (
+                    format!("{}/chat/completions", self.base),
+                    json!({ "model": model.id(), "messages": messages, "max_tokens": max_tokens.max(16) }),
+                )
+            }
+            Provider::Anthropic => (
+                self.anthropic_url.clone(),
+                json!({
+                    "model": model.id(),
+                    "max_tokens": max_tokens.max(16),
+                    "system": system,
+                    "messages": [{"role":"user","content":user}],
+                }),
+            ),
         };
 
         let mut attempt = 0u32;
         loop {
             self.usage.calls.fetch_add(1, Ordering::Relaxed);
-            let resp = self
-                .http
-                .post(&url)
-                .header("Authorization", format!("Bearer {}", self.api_key))
-                .header("Content-Type", "application/json")
-                .json(&body)
-                .send()
-                .await;
+            let req = match provider {
+                Provider::Anthropic => self
+                    .http
+                    .post(&url)
+                    .header("x-api-key", &self.anthropic_key)
+                    .header("anthropic-version", "2023-06-01")
+                    .header("Content-Type", "application/json"),
+                _ => self
+                    .http
+                    .post(&url)
+                    .header("Authorization", format!("Bearer {}", self.api_key))
+                    .header("Content-Type", "application/json"),
+            };
+            let resp = req.json(&body).send().await;
 
             match resp {
                 Ok(r) => {
                     let status = r.status();
-                    if status.as_u16() == 401 {
+                    if status.as_u16() == 401 && provider != Provider::Anthropic {
                         // Fall back to api-key header path once.
                         let r2 = self
                             .http
@@ -334,6 +375,19 @@ impl ModelClient {
         let v: Value = serde_json::from_str(txt)
             .with_context(|| format!("non-JSON response from {}: {}", model.id(), truncate(txt, 300)))?;
         self.record_usage(&v);
+        if model.provider() == Provider::Anthropic {
+            // Anthropic Messages API: content is an array of blocks; take the text block(s).
+            if let Some(arr) = v.get("content").and_then(|c| c.as_array()) {
+                for block in arr {
+                    if block.get("type").and_then(|t| t.as_str()) == Some("text") {
+                        if let Some(text) = block.get("text").and_then(|t| t.as_str()) {
+                            return Ok(text.to_string());
+                        }
+                    }
+                }
+            }
+            return Err(anyhow!("no text block in Anthropic response for {}", model.id()));
+        }
         if model.uses_responses() {
             // Prefer a top-level convenience field, else find the message item.
             if let Some(s) = v.get("output_text").and_then(|x| x.as_str()) {
@@ -454,6 +508,8 @@ mod tests {
             http: reqwest::Client::new(),
             base: DEFAULT_BASE.to_string(),
             api_key: String::new(),
+            anthropic_key: String::new(),
+            anthropic_url: "https://api.anthropic.com/v1/messages".to_string(),
             sem: Arc::new(Semaphore::new(1)),
             max_retries: 0,
             cache: None,

@@ -35,18 +35,18 @@
       <span>whole city</span>
     </button>
 
-    <!-- top-right: query summary + response progress -->
-    <div id="summary" class="summary hidden" aria-live="polite">
-      <div id="summary-label" class="summary-label">PREDICTING</div>
-      <div id="summary-text" class="summary-text"></div>
-      <div id="progress" class="progress">
-        <div class="progress-track"><div id="progress-fill" class="progress-fill"></div></div>
-        <div id="progress-label" class="progress-label"></div>
-      </div>
-    </div>
-
-    <!-- bottom-center dock: result card · composer row (ask + info) -->
+    <!-- bottom-center dock: query progress · result card · composer row (ask + info) -->
     <div id="dock" class="dock">
+      <!-- query summary + response progress (loading state, bottom-center) -->
+      <div id="summary" class="summary hidden" aria-live="polite">
+        <div id="summary-label" class="summary-label">PREDICTING</div>
+        <div id="summary-text" class="summary-text"></div>
+        <div id="progress" class="progress">
+          <div class="progress-track"><div id="progress-fill" class="progress-fill"></div></div>
+          <div id="progress-label" class="progress-label"></div>
+        </div>
+      </div>
+
       <div id="result-card" class="result-card hidden" role="dialog" aria-modal="false" aria-label="Prediction result"></div>
 
       <div class="dock-row">
@@ -77,7 +77,7 @@
       <p>We simulated the population of San Francisco distributed across real US Census data and achieved near-parity with these types of real-world events.</p>
 
       <div class="about-h">Historically predictive</div>
-      <p>How do we know if our simulation of SF is accurate? We ran <b>GPT-4o</b> (oops, sorry — we had more GPT API credits to spawn thousands of simulated humans) with a knowledge cutoff of <b>October 2023</b> and queried the twin city to predict election results:</p>
+      <p>How do we know if our simulation of SF is accurate? The honest test needs a model whose knowledge cutoff <i>predates</i> the event, so it can't have just memorized the outcome. The older Claude models with a 2023 cutoff have since been <b>retired</b> — so for this leakage-free backtest we ran <b>GPT-4o</b> (knowledge cutoff <b>October 2023</b>) and asked the twin city to predict results it had never seen. (The live app you're using runs the current <b>Claude Sonnet 4.6</b>.)</p>
 
       <div class="about-ex">
         <div class="about-ex-title"><i>2024 Presidency</i></div>

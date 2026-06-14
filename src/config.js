@@ -9,7 +9,7 @@ export const BASE = "https://sf-digital-twin-tp.fly.dev";
 // crowd; poll latency stays bounded because agents are clustered into ≤160 archetypes
 // before the LLM is called, so the call count (not N) sets the wait.
 export const SIM = {
-  n: 5000,
+  n: 10000,
   seed: 42,
   start_datetime: "2026-06-13T08:00:00Z",
   tick_seconds: 30,

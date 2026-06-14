@@ -104,10 +104,21 @@ function fallbackAgents(n) {
 }
 
 // ── ask composer (multiline) ───────────────────────────────────────────
+// The composer opens at exactly one line and expands only HORIZONTALLY; it grows
+// vertically solely when the typed text wraps past a single line.
+const LINE_H = 24;
 function autoGrow() {
   const ta = els.askInput;
-  ta.style.height = "auto";
-  ta.style.height = Math.min(ta.scrollHeight, Math.round(window.innerHeight * 0.4)) + "px";
+  ta.style.height = LINE_H + "px";          // reset to one line, then measure
+  const sh = ta.scrollHeight;
+  if (sh > LINE_H + 1) {
+    const cap = Math.round(window.innerHeight * 0.4);
+    const h = Math.min(sh, cap);
+    ta.style.height = h + "px";
+    ta.style.overflowY = h >= cap ? "auto" : "hidden";
+  } else {
+    ta.style.overflowY = "hidden";
+  }
 }
 
 function openInput() {
@@ -120,13 +131,13 @@ function openInput() {
   setAsk("input");
   state.phase = "idle";
   setIdleStatus();
-  requestAnimationFrame(() => { els.askInput.value = ""; autoGrow(); els.askInput.focus(); });
+  requestAnimationFrame(() => { els.askInput.value = ""; els.askInput.style.height = LINE_H + "px"; els.askInput.focus(); });
 }
 
 function closeInput() {
   setAsk("idle");
   els.askInput.value = "";
-  els.askInput.style.height = "auto";
+  els.askInput.style.height = LINE_H + "px";
   els.askInput.blur();
 }
 

@@ -23,6 +23,8 @@ const SHEET = { blockW: 48, blockH: 64, cell: 16, perRow: 5, nChars: 10 };
 const WALK = [1, 0, 1, 2];      // contact-pass-contact-pass
 const WALK_FPS = 8;
 const SPRITE_WORLD = 22;        // sprite footprint in world px (~one 2 m cell ×~)
+// overview-LOD colors (one per character) so the zoomed-out crowd still reads as varied
+const CHAR_COLORS = ["#c64f3f", "#3f72c6", "#46a35a", "#8a5fbf", "#caa23c", "#cf6aa0", "#3fb5b0", "#b5713f", "#5a6470", "#d0823f"];
 
 // Pokémon-style thought bubbles (shown when zoomed in)
 const BUBBLE = { maxAtOnce: 7, sep: 165, cycleMs: 2600, font: '600 11px "neue-haas-grotesk-display", -apple-system, sans-serif', maxW: 156 };
@@ -415,7 +417,16 @@ export class SFMap {
       const w = drawPx, h = drawPx;
       const footX = s.x, footY = s.y;     // feet anchored to the cell
 
-      if (spriteOk) {
+      if (drawPx < 9 || !spriteOk) {
+        // overview LOD: a cheap colored square per agent (keeps 10k sprites at 60fps;
+        // blitting 10k sprite cells every frame would be far heavier)
+        const sz = Math.max(2, Math.round(drawPx * 0.6));
+        ctx.globalAlpha = breathing ? 0.5 + 0.4 * Math.sin(now / 240 + a.wx) : 0.92;
+        ctx.fillStyle = CHAR_COLORS[a.char % CHAR_COLORS.length];
+        ctx.fillRect(Math.round(footX - sz / 2), Math.round(footY - sz), sz, sz);
+        ctx.globalAlpha = 1;
+      } else {
+        // detail: the actual 16×16 character (depth via feet anchor)
         const bx = (a.char % SHEET.perRow) * SHEET.blockW;
         const by = Math.floor(a.char / SHEET.perRow) * SHEET.blockH;
         const sx = bx + a.frame * SHEET.cell;
@@ -424,10 +435,6 @@ export class SFMap {
         ctx.globalAlpha = breathing ? 0.55 + 0.35 * Math.sin(now / 240 + a.wx) : 1;
         ctx.drawImage(this.sprite, sx, sy, SHEET.cell, SHEET.cell, footX - w / 2, footY - h, w, h);
         ctx.globalAlpha = 1;
-      } else {
-        // sprite sheet not ready yet → neutral dot so the city is never empty
-        ctx.beginPath(); ctx.fillStyle = withAlpha(COLORS.inkSoft, 0.6);
-        ctx.arc(footX, footY - h / 2, Math.max(1.5, w * 0.18), 0, Math.PI * 2); ctx.fill();
       }
 
       // verdict marker: a colored dot floating just above the sprite's head

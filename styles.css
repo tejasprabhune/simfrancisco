@@ -242,8 +242,9 @@ body {
 }
 @keyframes dropUp { from { opacity: 0; transform: translateX(-50%) translateY(8px); } to { opacity: 1; transform: translateX(-50%); } }
 
-/* ── composer row: ask + info (?) button ───────────────────────────────── */
+/* ── composer row: [spacer] ask [info] — spacer == info width so ask centers ── */
 .dock-row { display: flex; align-items: flex-end; gap: 10px; }
+.dock-spacer { flex: none; width: 50px; height: 1px; }
 .info-btn {
   flex: none; width: 50px; height: 50px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;

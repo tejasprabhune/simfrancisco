@@ -114,7 +114,7 @@ export class SFMap {
     this.agents = [];
 
     this.imgW = 2144; this.imgH = 1920;           // updated when base loads
-    this.base = new Image(); this.baseReady = false; this.landMask = null;
+    this.base = new Image(); this.baseReady = false; this.landMask = null; this.landBox = null;
     this.base.onload = () => {
       this.imgW = this.base.naturalWidth; this.imgH = this.base.naturalHeight;
       this.baseReady = true; this._fitOverview(true); this._buildLandMask();
@@ -141,7 +141,7 @@ export class SFMap {
     this._loop = this._loop.bind(this);
     this.resize = this.resize.bind(this);
     window.addEventListener("resize", this.resize);
-    canvas.addEventListener("click", (e) => this._onClick(e));
+    this._setupPointer();                          // tap-to-zoom · drag-to-pan · pinch-zoom
     this.resize();
   }
 
@@ -201,16 +201,22 @@ export class SFMap {
       octx.drawImage(this.base, 0, 0);
       const data = octx.getImageData(0, 0, this.imgW, this.imgH).data;
       const mask = new Uint8Array(this.imgW * this.imgH);
+      let minX = this.imgW, minY = this.imgH, maxX = 0, maxY = 0, x = 0, y = 0;
       for (let i = 0, p = 0; i < mask.length; i++, p += 4) {
         const r = data[p], g = data[p + 1], b = data[p + 2];
         const water = b > 100 && b - r > 28 && b - g > 12;   // blue-dominant
         mask[i] = water ? 0 : 1;                              // 1 = land
+        if (!water) { if (x < minX) minX = x; if (x > maxX) maxX = x; if (y < minY) minY = y; if (y > maxY) maxY = y; }
+        if (++x === this.imgW) { x = 0; y++; }
       }
       this.landMask = mask;
+      // landmass bounding box → fit the overview to the CITY, not the water margins
+      this.landBox = maxX > minX ? { minX, minY, maxX, maxY } : null;
     } catch (e) {
       console.warn("land mask unavailable:", e);
-      this.landMask = null;
+      this.landMask = null; this.landBox = null;
     }
+    if (!this.zoomedIn) this._fitOverview(true);   // re-fit now that we know the land box
     // snap any already-placed agents onto land
     for (const a of this.agents) {
       const s = this._snapToLand(a.wx, a.wy);
@@ -239,18 +245,35 @@ export class SFMap {
   }
 
   // ── camera ───────────────────────────────────────────────────────────────
-  _fitZoom() { return Math.min(this.cssW / this.imgW, this.cssH / this.imgH); }
+  // Overview fits the CITY (land bounding box) to the screen, not the full image —
+  // so on a tall phone the city fills the viewport instead of shrinking into a band.
+  _fitZoom() {
+    const pad = 10;
+    if (this.landBox) {
+      const lw = this.landBox.maxX - this.landBox.minX, lh = this.landBox.maxY - this.landBox.minY;
+      return Math.min((this.cssW - pad * 2) / lw, (this.cssH - pad * 2) / lh);
+    }
+    return Math.min(this.cssW / this.imgW, this.cssH / this.imgH);
+  }
+  _fitCenter() {
+    if (this.landBox) return { x: (this.landBox.minX + this.landBox.maxX) / 2, y: (this.landBox.minY + this.landBox.maxY) / 2 };
+    return { x: this.imgW / 2, y: this.imgH / 2 };
+  }
+  _minZoom() { return this._fitZoom(); }
 
   _fitOverview(snap) {
     const z = this._fitZoom();
-    this.camTarget = { x: this.imgW / 2, y: this.imgH / 2, zoom: z };
+    const c = this._fitCenter();
+    this.camTarget = { x: c.x, y: c.y, zoom: z };
     this.zoomedIn = false;
     if (snap) this.cam = { ...this.camTarget };
     this.onZoomChange && this.onZoomChange(false);
   }
 
   zoomTo(wx, wy) {
-    const z = this._fitZoom() * MAP.detailZoomMul;
+    // detail zoom is clamped to an absolute range so "zoomed in" looks the same
+    // (crisp, walkable) on a phone and a desktop, regardless of the overview scale.
+    const z = Math.min(3.0, Math.max(2.0, this._fitZoom() * MAP.detailZoomMul));
     this.camTarget = this._clamped({ x: wx, y: wy, zoom: z });
     this.zoomedIn = true;
     this.onZoomChange && this.onZoomChange(true);
@@ -277,12 +300,67 @@ export class SFMap {
     return { x: (wx - this.cam.x) * this.cam.zoom + this.cssW / 2, y: (wy - this.cam.y) * this.cam.zoom + this.cssH / 2 };
   }
 
-  _onClick(e) {
-    const r = this.canvas.getBoundingClientRect();
-    const w = this.screenToWorld(e.clientX - r.left, e.clientY - r.top);
-    // clicking re-centres at detail zoom (lets you walk the city); the Return
-    // button (app.js) takes you back to the whole-city overview.
-    this.zoomTo(w.x, w.y);
+  // Unified pointer input (mouse + touch): tap → zoom to that spot; drag → pan
+  // (when zoomed in); two-finger pinch → zoom around the midpoint. Works on phones.
+  _setupPointer() {
+    const c = this.canvas;
+    c.style.touchAction = "none";   // we handle gestures ourselves
+    const pts = new Map();
+    let moved = 0, lastX = 0, lastY = 0, startDist = 0, startZoom = 0;
+    const rect = () => c.getBoundingClientRect();
+    const panBy = (dxScreen, dyScreen) => {
+      this.camTarget.x -= dxScreen / this.cam.zoom;
+      this.camTarget.y -= dyScreen / this.cam.zoom;
+      this.camTarget = this._clamped(this.camTarget);
+      this.cam.x = this.camTarget.x; this.cam.y = this.camTarget.y; // immediate while dragging
+    };
+    c.addEventListener("pointerdown", (e) => {
+      pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      try { c.setPointerCapture(e.pointerId); } catch {}
+      if (pts.size === 1) { moved = 0; lastX = e.clientX; lastY = e.clientY; }
+      else if (pts.size === 2) { const [a, b] = [...pts.values()]; startDist = Math.hypot(a.x - b.x, a.y - b.y); startZoom = this.cam.zoom; }
+    });
+    c.addEventListener("pointermove", (e) => {
+      if (!pts.has(e.pointerId)) return;
+      pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      if (pts.size >= 2) {
+        const [a, b] = [...pts.values()];
+        const dist = Math.hypot(a.x - b.x, a.y - b.y);
+        if (startDist > 0) {
+          const r = rect();
+          const mx = (a.x + b.x) / 2 - r.left, my = (a.y + b.y) / 2 - r.top;
+          const wb = this.screenToWorld(mx, my);
+          const z = Math.min(4.0, Math.max(this._minZoom(), startZoom * (dist / startDist)));
+          this.cam.zoom = z; this.camTarget.zoom = z;
+          const wa = this.screenToWorld(mx, my);
+          this.camTarget.x += wb.x - wa.x; this.camTarget.y += wb.y - wa.y;
+          this.camTarget = this._clamped(this.camTarget);
+          this.cam.x = this.camTarget.x; this.cam.y = this.camTarget.y;
+          const zi = z > this._minZoom() * 1.4;
+          if (zi !== this.zoomedIn) { this.zoomedIn = zi; this.onZoomChange && this.onZoomChange(zi); }
+        }
+        moved += 30;
+        return;
+      }
+      const dx = e.clientX - lastX, dy = e.clientY - lastY;
+      lastX = e.clientX; lastY = e.clientY;
+      moved += Math.abs(dx) + Math.abs(dy);
+      if (this.zoomedIn) panBy(dx, dy);
+    });
+    const end = (e) => {
+      if (!pts.has(e.pointerId)) return;
+      const wasSingle = pts.size === 1;
+      pts.delete(e.pointerId);
+      try { c.releasePointerCapture(e.pointerId); } catch {}
+      if (pts.size < 2) startDist = 0;
+      if (wasSingle && moved < 8) {            // a tap (not a drag) → zoom to it
+        const r = rect();
+        const w = this.screenToWorld(e.clientX - r.left, e.clientY - r.top);
+        this.zoomTo(w.x, w.y);
+      }
+    };
+    c.addEventListener("pointerup", end);
+    c.addEventListener("pointercancel", end);
   }
 
   resize() {

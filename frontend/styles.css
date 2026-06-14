@@ -297,6 +297,28 @@ body {
 .about-ex-nums .actual { color: var(--ink); }
 .about-ex-nums .pred { color: var(--yes); }
 
+/* ── mobile / narrow screens: keep the chrome compact and non-overlapping ── */
+@media (max-width: 560px) {
+  .title { top: 12px; left: 12px; font-size: 19px; padding: 8px 12px 7px; border-radius: 11px; }
+  .status { top: 14px; right: 12px; font-size: 11px; max-width: 52vw; padding: 6px 11px; }
+  .return { top: 52px; left: 12px; font-size: 12px; padding: 6px 11px 6px 9px; }
+
+  .dock { bottom: 16px; gap: 9px; max-width: 96vw; }
+  .summary, .result-card { width: min(94vw, 440px); }
+  .summary-text { font-size: 13.5px; }
+  .ask[data-state="input"] { width: min(560px, calc(96vw - 104px)); }
+  .ask[data-state="busy"] { width: 172px; }
+  .info-btn { width: 46px; height: 46px; font-size: 18px; }
+  .dock-spacer { width: 46px; }
+
+  .about { width: 94vw; padding: 22px 18px 24px; max-height: 84vh; }
+  .about-title { font-size: 25px; }
+  .res-pct { font-size: 44px; }
+
+  /* thought bubbles are noisy on a small screen — let the sprites breathe */
+  .toast { bottom: 86px; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   * { animation-duration: .001ms !important; transition-duration: .001ms !important; }
 }

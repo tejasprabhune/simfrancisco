@@ -85,11 +85,20 @@ async function boot() {
 }
 
 function setIdleStatus() {
-  const d = new Date(SIM.start_datetime);
-  const date = d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
-  els.status.textContent = `san francisco · ${state.residents.toLocaleString()} residents · ${date}`;
+  const n = state.residents.toLocaleString();
+  if (window.innerWidth < 560) {
+    els.status.textContent = `${n} residents`;            // compact on phones
+  } else {
+    const d = new Date(SIM.start_datetime);
+    const date = d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+    els.status.textContent = `san francisco · ${n} residents · ${date}`;
+  }
   show(els.status);
 }
+// keep the status text right-sized across orientation changes
+window.addEventListener("resize", () => {
+  if (state.phase === "idle" || state.phase === "results") setIdleStatus();
+});
 
 // random points inside the map bbox, for the offline preview only
 function fallbackAgents(n) {

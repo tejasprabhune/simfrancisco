@@ -192,6 +192,7 @@ async function runPrediction(question) {
     state.lastResult = { ...result, framing };
 
     const verdicts = assignVerdicts(map.agents, result.p_yes, question, map.proj.planarSize);
+    map.setRationales(result.sample_rationales);   // real per-agent reasoning → thought bubbles
     els.progress.classList.remove("indeterminate");
     els.progressLabel.textContent = `0 / ${map.agents.length.toLocaleString()} responses`;
     map.onProgress = onRevealProgress;

@@ -128,6 +128,8 @@ export class SFMap {
     this.camTarget = { ...this.cam };
     this.zoomedIn = false;
     this.onZoomChange = null;                      // (zoomedIn:boolean) => {}
+    this.onSpriteTap = null;                       // (sprite) => {}  tap a character
+    this.onEmptyTap = null;                        // () => bool      tap empty space (return true to suppress zoom)
 
     this.mode = "idle";                            // idle|waiting|reveal|results|clearing
     this.t0 = performance.now();
@@ -184,6 +186,9 @@ export class SFMap {
           seed: a.id ?? i,
           thought: makeThought(a, a.id ?? i),   // diverse persona thought (backend value vector + demographics)
           rationale: null,                       // set from a poll's sample_rationales
+          // seeded persona, surfaced when you tap a character
+          name: a.name, age: a.age, race: a.race_eth, educ: a.educ,
+          hood: a.neighborhood, values: a.values, action: a.action,
         };
       });
   }
@@ -353,14 +358,48 @@ export class SFMap {
       pts.delete(e.pointerId);
       try { c.releasePointerCapture(e.pointerId); } catch {}
       if (pts.size < 2) startDist = 0;
-      if (wasSingle && moved < 8) {            // a tap (not a drag) → zoom to it
+      if (wasSingle && moved < 8) {            // a tap (not a drag)
         const r = rect();
-        const w = this.screenToWorld(e.clientX - r.left, e.clientY - r.top);
-        this.zoomTo(w.x, w.y);
+        const tx = e.clientX - r.left, ty = e.clientY - r.top;
+        if (this.zoomedIn) {
+          const hit = this._hitSprite(tx, ty);
+          if (hit) { this.onSpriteTap && this.onSpriteTap(hit); return; }   // tapped a character → inspect
+          if (this.onEmptyTap && this.onEmptyTap()) return;                  // app closed an open card
+        }
+        const w = this.screenToWorld(tx, ty);
+        this.zoomTo(w.x, w.y);                  // empty space (or overview) → zoom in
       }
     };
     c.addEventListener("pointerup", end);
     c.addEventListener("pointercancel", end);
+  }
+
+  // nearest character under a screen point (only when sprites are big enough to tap)
+  _hitSprite(sx, sy) {
+    const drawPx = Math.max(3, SPRITE_WORLD * this.cam.zoom);
+    if (drawPx < 14) return null;
+    const rx = drawPx * 0.55, ry = drawPx * 0.9;
+    let best = null, bestD = Infinity;
+    for (const a of this.agents) {
+      const s = this.worldToScreen(a.wx, a.wy);     // feet
+      const cx = s.x, cy = s.y - drawPx * 0.5;       // body centre
+      if (Math.abs(sx - cx) > rx || Math.abs(sy - cy) > ry) continue;
+      const d = (sx - cx) * (sx - cx) + (sy - cy) * (sy - cy);
+      if (d < bestD) { bestD = d; best = a; }
+    }
+    return best;
+  }
+
+  // draw a character's idle portrait into a small canvas (for the inspector card)
+  drawCharTo(canvas, char) {
+    if (!this.spriteReady || !canvas) return;
+    const ctx = canvas.getContext("2d");
+    ctx.imageSmoothingEnabled = false;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const bx = (char % SHEET.perRow) * SHEET.blockW;
+    const by = Math.floor(char / SHEET.perRow) * SHEET.blockH;
+    const sx = bx + 1 * SHEET.cell, sy = by + 0 * SHEET.cell;   // frame 1 (idle), dir 0 (down)
+    ctx.drawImage(this.sprite, sx, sy, SHEET.cell, SHEET.cell, 0, 0, canvas.width, canvas.height);
   }
 
   resize() {

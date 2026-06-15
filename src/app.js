@@ -37,6 +37,7 @@ const els = {
   about: $("about"),
   aboutScrim: $("about-scrim"),
   aboutClose: $("about-close"),
+  charCard: $("char-card"),
 };
 
 const map = new SFMap(els.canvas);
@@ -148,6 +149,7 @@ function openInput() {
   if (state.phase === "error" || !state.simId) { toast("Predictions need the backend — it's currently unreachable."); return; }
   cleanupBranch();
   map.clearVerdicts();
+  closeCharCard();
   hide(els.summary);
   hide(els.resultCard);
   setAsk("input");
@@ -328,6 +330,51 @@ els.askInput.addEventListener("input", autoGrow);
 
 els.returnBtn.addEventListener("click", () => { map.returnToOverview(); });
 
+// ── character inspector (tap a character when zoomed in) ────────────────────
+const charOpen = () => !els.charCard.classList.contains("hidden");
+function closeCharCard() { hide(els.charCard); }
+const RACE_LABEL = { white: "white", black: "Black", asian: "Asian", hispanic: "Latino/Hispanic", pacific: "Pacific Islander", native: "Native American", other_multi: "multiracial" };
+const EDUC_LABEL = { lt_hs: "no HS diploma", hs: "high-school educated", some_college: "some college", bachelors: "bachelor's degree", graduate: "graduate degree" };
+const ISSUE_LABEL = { s_housing: "housing", s_crime: "public safety", s_homeless: "homelessness", s_cost: "cost of living", s_environment: "climate", s_immigration: "immigration" };
+function leanLabel(v, lo, hi) { if (v == null) return null; return v < -0.33 ? lo : v > 0.33 ? hi : null; }
+function topIssues(v, n = 2) {
+  if (!v) return [];
+  return Object.keys(ISSUE_LABEL).map((k) => [ISSUE_LABEL[k], v[k] ?? 0]).sort((a, b) => b[1] - a[1]).slice(0, n).map((x) => x[0]);
+}
+function showCharCard(s) {
+  if (!s || !s.name) return;                 // offline-preview agents have no persona
+  const v = s.values || {};
+  const dem = [s.age != null ? `${s.age}` : null, RACE_LABEL[s.race] || s.race, EDUC_LABEL[s.educ] || s.educ].filter(Boolean).join(" · ");
+  const tags = [leanLabel(v.economic, "economically left", "economically right"), leanLabel(v.social, "socially progressive", "socially conservative")].filter(Boolean);
+  const issues = topIssues(v, 2);
+  const isPoll = s.verdict != null;
+  const label = isPoll ? `leaning ${s.verdict}` : "thinking";
+  const labelClass = isPoll ? (s.verdict === "yes" ? "yes" : "no") : "";
+  const thought = isPoll && s.rationale ? s.rationale : s.thought;
+  els.charCard.innerHTML = `
+    <button id="char-close" class="char-close" aria-label="Close">×</button>
+    <div class="char-head">
+      <canvas id="char-portrait" class="char-portrait" width="46" height="46"></canvas>
+      <div class="char-id">
+        <div class="char-name">${escapeHtml(s.name)}</div>
+        <div class="char-sub">${escapeHtml(dem)}${s.hood ? " · " + escapeHtml(s.hood) : ""}</div>
+      </div>
+    </div>
+    <div class="char-tags">
+      ${tags.map((t) => `<span class="char-tag">${escapeHtml(t)}</span>`).join("")}
+      ${issues.map((i) => `<span class="char-tag issue">cares about ${escapeHtml(i)}</span>`).join("")}
+    </div>
+    <div class="char-think">
+      <div class="char-label ${labelClass}">${label}</div>
+      <div class="char-thought">“${escapeHtml(thought || "…")}”</div>
+    </div>`;
+  show(els.charCard);
+  $("char-close").addEventListener("click", closeCharCard);
+  map.drawCharTo($("char-portrait"), s.char);
+}
+map.onSpriteTap = showCharCard;
+map.onEmptyTap = () => { if (charOpen()) { closeCharCard(); return true; } return false; };
+
 // about card (the ? button)
 const aboutOpen = () => !els.about.classList.contains("hidden");
 function openAbout() { show(els.about); show(els.aboutScrim); }
@@ -344,6 +391,7 @@ document.addEventListener("mousedown", (e) => {
 document.addEventListener("keydown", (e) => {
   if (e.key === "Escape") {
     if (aboutOpen()) closeAbout();
+    else if (charOpen()) closeCharCard();
     else if (isBusy()) cancelPrediction();
     else if (state.phase === "results") dismissResults();
     else if (inputOpen()) closeInput();

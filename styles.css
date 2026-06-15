@@ -338,6 +338,41 @@ body {
   .toast { bottom: 86px; }
 }
 
+/* ── character inspector card (tap a character) ────────────────────────── */
+.char-card {
+  position: fixed; left: 20px; bottom: 96px; z-index: 9;
+  width: min(300px, 86vw);
+  border-radius: 18px; padding: 15px 16px 16px;
+  background: var(--glass-strong);
+  backdrop-filter: var(--blur-lg); -webkit-backdrop-filter: var(--blur-lg);
+  border: 1px solid var(--glass-edge); box-shadow: var(--neu-lg);
+  color: var(--ink);
+  animation: cardUp var(--t-mid) var(--ease-pop);
+}
+.char-close {
+  position: absolute; top: 10px; right: 12px; width: 26px; height: 26px; border-radius: 50%;
+  border: 1px solid var(--glass-edge); background: rgba(255, 255, 255, .5); color: var(--ink-soft);
+  cursor: pointer; font-size: 16px; line-height: 1; display: flex; align-items: center; justify-content: center;
+  transition: transform var(--t-fast) var(--ease), color var(--t) var(--ease);
+}
+.char-close:hover { transform: scale(1.08); color: var(--ink); }
+.char-head { display: flex; align-items: center; gap: 11px; padding-right: 26px; }
+.char-portrait { width: 46px; height: 46px; image-rendering: pixelated; background: rgba(20, 20, 20, .06); border: 1px solid var(--glass-edge); border-radius: 9px; flex: none; }
+.char-id { min-width: 0; }
+.char-name { font-size: 16px; font-weight: 700; line-height: 1.15; }
+.char-sub { font-size: 12px; color: var(--ink-soft); margin-top: 2px; }
+.char-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+.char-tag { font-size: 11px; font-weight: 600; color: var(--ink); background: rgba(20, 20, 20, .08); border-radius: 999px; padding: 3px 9px; }
+.char-tag.issue { background: rgba(20, 20, 20, .04); color: var(--ink-soft); }
+.char-think { margin-top: 12px; border-top: 1px solid var(--glass-edge); padding-top: 11px; }
+.char-label { font-size: 10px; font-weight: 700; letter-spacing: .13em; text-transform: uppercase; color: var(--ink-soft); margin-bottom: 5px; }
+.char-label.yes { color: var(--yes); }
+.char-label.no { color: var(--no); }
+.char-thought { font-size: 13.5px; line-height: 1.45; font-style: italic; color: var(--ink); }
+@media (max-width: 560px) {
+  .char-card { left: 8px; right: 8px; bottom: 86px; width: auto; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   * { animation-duration: .001ms !important; transition-duration: .001ms !important; }
 }

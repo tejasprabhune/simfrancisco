@@ -2,9 +2,8 @@
 
 **simulate and predict our golden city and beyond**
 
-- 🟢 **Live app:** https://tejasprabhune.github.io/simfrancisco/
-- 🟢 **Live API:** https://sf-digital-twin-tp.fly.dev (`GET /health`)
-- Integration spec: [INTEGRATION.md](INTEGRATION.md) · Scored "done": [rubric.yaml](rubric.yaml) + `cargo run --bin validate` · Loop memory: [NOTES.md](NOTES.md)
+- **Live app:** https://tejasprabhune.github.io/simfrancisco/
+- **Live API:** https://sf-digital-twin-tp.fly.dev (`GET /health`)
 
 A *distributionally accurate* synthetic population of San Francisco — sampled from real US
 Census microdata — that can be polled and perturbed with events to produce population-level
@@ -74,7 +73,7 @@ post-stratified with PUMS weights. A sqlite cache keyed by `(model, exact prompt
 ## Reproduce it
 
 Everything is reproducible given one secret: `MODEL_API_KEY` (Azure AI Foundry). Both halves are
-already deployed and **publicly accessible** (the two 🟢 links above).
+already deployed and **publicly accessible**.
 
 ### Backend (Rust · axum · sqlite)
 

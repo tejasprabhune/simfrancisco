@@ -432,6 +432,8 @@ body {
   font-size: 13px; line-height: 1.5; color: var(--ink-soft);
 }
 .about-credit b { color: var(--ink); }
+.about-credit a { color: var(--ink); text-decoration: underline; text-underline-offset: 2px; text-decoration-thickness: 1px; }
+.about-credit a:hover { opacity: .7; }
 
 /* ── mobile / narrow screens: keep the chrome compact and non-overlapping ── */
 @media (max-width: 560px) {

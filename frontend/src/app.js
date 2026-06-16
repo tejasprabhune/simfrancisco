@@ -206,7 +206,11 @@ function renderNews() {
     ? `<svg class="news-toggle" viewBox="0 0 24 24" width="13" height="13" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6"/></svg>`
     : "";
   const head = `<span class="news-head"><span>informing the residents</span>${caret}</span>`;
-  const body = state.newsExpanded
+  // on mobile the status drops the clock for space, so surface it here when opened
+  const kd = state.city?.knowledge_date;
+  const clock = (state.newsExpanded && kd && window.innerWidth < 560)
+    ? `<div class="news-clock">residents know the news up to ${escapeHtml(fmtDate(kd))}</div>` : "";
+  const body = clock + (state.newsExpanded
     ? arts.map((a) =>
         `<div class="news-art">` +
         (a.date ? `<span class="news-art-date">${escapeHtml(fmtDate(a.date))}</span>` : "") +
@@ -214,7 +218,7 @@ function renderNews() {
         (a.summary ? `<span class="news-art-sum">${escapeHtml(a.summary)}</span>` : "") +
         `</div>`
       ).join("")
-    : arts.slice(0, 3).map((a) => `<span class="news-item">${escapeHtml(a.headline)}</span>`).join("");
+    : arts.slice(0, 3).map((a) => `<span class="news-item">${escapeHtml(a.headline)}</span>`).join(""));
   els.newsBubble.innerHTML = head + body;
 }
 

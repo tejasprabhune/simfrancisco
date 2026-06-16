@@ -16,3 +16,14 @@ state.db-*
 NOTES.md
 BRIEF.md
 .claude
+tiles.db
+frontend
+assets
+tools
+config
+scripts
+rubric_*.yaml
+rubric.yaml
+*.md
+data/*.aux.xml
+verify_out

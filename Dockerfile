@@ -6,6 +6,10 @@ WORKDIR /app
 # so `-p simfrancisco --bin server` never compiles it.
 COPY Cargo.toml Cargo.lock ./
 COPY crates ./crates
+# Survey CSVs are baked into the binary at compile time via include_str! in
+# crates/sim-core/src/lifestyle.rs (../../../data/survey/*.csv), so they must be
+# present in the builder before the build.
+COPY data/survey ./data/survey
 RUN cargo build --release -p simfrancisco --bin server
 
 FROM debian:bookworm-slim

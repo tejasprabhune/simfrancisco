@@ -28,6 +28,30 @@ async fn main() -> anyhow::Result<()> {
         state.tiles.manifest.chunks_y
     );
 
+    // In-process news daemon: advance the served clock to today + (with NEWS_API_KEY)
+    // pull fresh per-city headlines on a schedule. Gated on NEWS_REFRESH_HOURS so local
+    // dev runs don't overwrite the committed/curated cache; fly.toml sets it.
+    if let Some(hours) = std::env::var("NEWS_REFRESH_HOURS")
+        .ok()
+        .and_then(|h| h.parse::<u64>().ok())
+        .filter(|&h| h > 0)
+    {
+        let cities: Vec<(String, String)> = state
+            .cities
+            .values()
+            .map(|rt| (rt.profile.slug.clone(), rt.profile.prompt_name.clone()))
+            .collect();
+        tracing::info!("news refresh enabled: every {hours}h across {} cities", cities.len());
+        tokio::spawn(async move {
+            loop {
+                let date = simfrancisco::news::today();
+                tracing::info!("news refresh: advancing clock to {date}");
+                simfrancisco::news::refresh_all(&cities, &date).await;
+                tokio::time::sleep(std::time::Duration::from_secs(hours * 3600)).await;
+            }
+        });
+    }
+
     let app = api::router(state);
     let addr = SocketAddr::from(([0, 0, 0, 0], port));
     let listener = tokio::net::TcpListener::bind(addr).await?;

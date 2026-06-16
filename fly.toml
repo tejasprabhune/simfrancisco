@@ -13,6 +13,9 @@ primary_region = "sjc"
   # tracks the call count, not N. Higher in-flight cap parallelizes those calls.
   MODEL_MAX_INFLIGHT = "16"
   MAX_CLUSTERS = "160"
+  # In-process news daemon: refresh each city's clock + headlines every N hours.
+  # NEWS_API_KEY (set via `fly secrets set`) supplies the live headlines.
+  NEWS_REFRESH_HOURS = "6"
 
 [http_service]
   internal_port = 8080

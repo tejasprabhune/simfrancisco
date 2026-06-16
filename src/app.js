@@ -17,7 +17,10 @@ import * as api from "./api.js";
 const $ = (id) => document.getElementById(id);
 const els = {
   canvas: $("map"),
-  citySwitcher: $("city-switcher"),
+  titleSelect: $("title-select"),
+  titleBtn: $("title-btn"),
+  titleCurrent: $("title-current"),
+  titleMenu: $("title-menu"),
   status: $("status"),
   newsBubble: $("news-bubble"),
   boot: $("boot"),
@@ -54,11 +57,26 @@ const state = {
   cities: [],            // [{slug, display, bbox, ...}] from GET /cities
   city: null,            // the active city object (falls back to a synthetic "sf")
   switching: false,      // true while a city swap is re-creating the simulation
+  news: [],              // the active city's recent articles (expandable bubble)
+  newsExpanded: false,   // whether the news bubble is showing all of them
 };
 
 // fallback city when /cities is unavailable — keeps the single-city SF behavior.
 const SF_FALLBACK = { slug: "sf", display: "sim francisco", bbox: { ...MAP.bbox }, default: true };
 const citySlug = () => state.city?.slug || "sf";
+
+// fetch LLM chatter for the residents now on screen (sparse, batched, best-effort)
+async function requestChatter(ids) {
+  if (!state.mainBranch || !ids?.length) return;
+  const branch = state.mainBranch;
+  try {
+    const data = await api.getChatter(branch, ids);
+    if (branch !== state.mainBranch) return;            // city swapped mid-flight — drop it
+    const ch = data?.chatter || {};
+    for (const [id, text] of Object.entries(ch)) map.setThought(Number(id), text);
+  } catch { /* best-effort: residents keep their neutral fallback thought */ }
+}
+map.onNeedChatter = requestChatter;
 
 const isBusy = () => state.phase === "waiting" || state.phase === "reveal";
 const inputOpen = () => els.ask.dataset.state === "input";
@@ -91,7 +109,7 @@ async function boot() {
     if (cities.length) {
       state.cities = cities;
       initial = cities.find((c) => c.default) || cities[0];
-      buildCitySwitcher();
+      buildTitleSelect();
     }
   } catch (err) {
     console.warn("city catalog unavailable, falling back to SF:", err);
@@ -108,9 +126,10 @@ async function loadCity(city) {
   MAP.base = `assets/${city.slug}_tiles.png`;
   if (city.bbox) MAP.bbox = { ...city.bbox };
   map.setBase(MAP.base);
-  syncActiveChip();
+  syncActiveTitle();
 
   els.status.textContent = `waking ${city.display}…`;
+  hide(els.newsBubble);            // clear the previous city's news while loading
   show(els.boot); setBoot(0.06);
   try {
     const sim = await api.createSimulation({ city: city.slug });
@@ -123,10 +142,11 @@ async function loadCity(city) {
     if (!agents.length) throw new Error("no agents returned");
     map.setAgents(agents);
     state.residents = agents.length;
+    map.setSim(city.slug, state.mainBranch);     // scope ambient chatter to this city + branch
     setBoot(1);
-    setTimeout(() => hide(els.boot), 450);       // let the bar finish, then fade out
     setIdleStatus();
-    loadNews(city.slug);                         // fill the fleeting news bubble (best-effort)
+    // let the bar finish, fade it out, then surface the news in its place (no overlap)
+    setTimeout(() => { hide(els.boot); loadNews(city.slug); }, 450);
     state.phase = "idle";
   } catch (err) {
     console.error(err);
@@ -146,7 +166,7 @@ function setIdleStatus() {
   const kd = state.city?.knowledge_date;
   // the clock = the date up to which the residents know the news (their knowledge cutoff)
   const clock = kd
-    ? `<span class="status-clock">🕐 residents know the news up to ${escapeHtml(fmtDate(kd))}</span>`
+    ? `<span class="status-clock">residents know the news up to ${escapeHtml(fmtDate(kd))}</span>`
     : "";
   if (window.innerWidth < 560) {
     els.status.innerHTML = `${n} residents`;              // compact on phones
@@ -162,41 +182,95 @@ function fmtDate(iso) {
   return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 }
 
-// fetch the city's recent news into the fleeting bubble (best-effort)
+// fetch the city's recent news into the bubble (best-effort); click to expand all
 async function loadNews(slug) {
+  state.newsExpanded = false;
   try {
     const data = await api.getNews(slug);
-    const arts = (data.articles || []).slice(0, 3);
-    if (!arts.length) { hide(els.newsBubble); return; }
-    els.newsBubble.innerHTML =
-      `<span class="news-head">📰 informing the residents</span>` +
-      arts.map((a) => `<span class="news-item">${escapeHtml(a.headline)}</span>`).join("");
+    state.news = data.articles || [];
+    if (!state.news.length) { hide(els.newsBubble); return; }
+    renderNews();
     show(els.newsBubble);
   } catch {
+    state.news = [];
     hide(els.newsBubble);
   }
 }
 
-// ── city switcher ─────────────────────────────────────────────────────────
-function buildCitySwitcher() {
-  els.citySwitcher.innerHTML = state.cities.map((c) =>
-    `<button class="city-chip" type="button" data-slug="${escapeHtml(c.slug)}"
-       aria-pressed="false">${escapeHtml(c.display)}</button>`
-  ).join("");
-  els.citySwitcher.querySelectorAll(".city-chip").forEach((btn) => {
-    btn.addEventListener("click", () => onSelectCity(btn.dataset.slug));
-  });
-  show(els.citySwitcher);
+// render the news bubble in its current (collapsed / expanded) state
+function renderNews() {
+  const arts = state.news;
+  if (!arts.length) { hide(els.newsBubble); return; }
+  els.newsBubble.dataset.expanded = state.newsExpanded ? "true" : "false";
+  const caret = arts.length > 1
+    ? `<svg class="news-toggle" viewBox="0 0 24 24" width="13" height="13" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6"/></svg>`
+    : "";
+  const head = `<span class="news-head"><span>informing the residents</span>${caret}</span>`;
+  const body = state.newsExpanded
+    ? arts.map((a) =>
+        `<div class="news-art">` +
+        (a.date ? `<span class="news-art-date">${escapeHtml(fmtDate(a.date))}</span>` : "") +
+        `<span class="news-art-head">${escapeHtml(a.headline)}</span>` +
+        (a.summary ? `<span class="news-art-sum">${escapeHtml(a.summary)}</span>` : "") +
+        `</div>`
+      ).join("")
+    : arts.slice(0, 3).map((a) => `<span class="news-item">${escapeHtml(a.headline)}</span>`).join("");
+  els.newsBubble.innerHTML = head + body;
 }
 
-// reflect the active city + lock the chips while a swap is in flight
-function syncActiveChip() {
-  els.citySwitcher.querySelectorAll(".city-chip").forEach((btn) => {
-    const active = btn.dataset.slug === citySlug();
-    btn.setAttribute("aria-pressed", active ? "true" : "false");
+// click the bubble to expand it to all the news updating the residents (and back)
+els.newsBubble.addEventListener("click", () => {
+  if (!state.news.length) return;
+  state.newsExpanded = !state.newsExpanded;
+  renderNews();
+});
+
+// ── title-select: the title itself is the city switcher ────────────────────
+function buildTitleSelect() {
+  els.titleMenu.innerHTML = state.cities.map((c) =>
+    `<button class="title-option" type="button" role="option" data-slug="${escapeHtml(c.slug)}"
+       aria-selected="false">${escapeHtml(c.display)}</button>`
+  ).join("");
+  els.titleMenu.querySelectorAll(".title-option").forEach((btn) => {
+    btn.addEventListener("click", () => { closeTitleMenu(); onSelectCity(btn.dataset.slug); });
+  });
+  syncActiveTitle();
+}
+
+function titleMenuOpen() { return els.titleBtn.getAttribute("aria-expanded") === "true"; }
+function openTitleMenu() {
+  if (state.cities.length <= 1 || state.switching) return;
+  show(els.titleMenu);
+  els.titleBtn.setAttribute("aria-expanded", "true");
+}
+function closeTitleMenu() {
+  hide(els.titleMenu);
+  els.titleBtn.setAttribute("aria-expanded", "false");
+}
+function toggleTitleMenu() { titleMenuOpen() ? closeTitleMenu() : openTitleMenu(); }
+
+// reflect the active city in the title button + the menu; lock while swapping
+function syncActiveTitle() {
+  const city = state.cities.find((c) => c.slug === citySlug());
+  els.titleCurrent.textContent = city?.display || state.city?.display || "sim francisco";
+  els.titleMenu.querySelectorAll(".title-option").forEach((btn) => {
+    btn.setAttribute("aria-selected", btn.dataset.slug === citySlug() ? "true" : "false");
     btn.disabled = state.switching;
   });
+  els.titleBtn.disabled = state.switching || state.cities.length <= 1;
 }
+
+// title-button toggles the dropdown; click-away / Escape close it
+els.titleBtn.addEventListener("click", (e) => {
+  e.stopPropagation();
+  if (!els.titleBtn.disabled) toggleTitleMenu();
+});
+document.addEventListener("click", (e) => {
+  if (titleMenuOpen() && !els.titleSelect.contains(e.target)) closeTitleMenu();
+});
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && titleMenuOpen()) closeTitleMenu();
+});
 
 async function onSelectCity(slug) {
   if (state.switching || slug === citySlug()) return;
@@ -215,12 +289,12 @@ async function onSelectCity(slug) {
 
   state.switching = true;
   state.phase = "booting";
-  syncActiveChip();
+  syncActiveTitle();
   try {
     await loadCity(city);
   } finally {
     state.switching = false;
-    syncActiveChip();
+    syncActiveTitle();
   }
 }
 // keep the status text right-sized across orientation changes

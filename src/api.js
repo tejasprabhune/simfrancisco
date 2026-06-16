@@ -45,6 +45,15 @@ export const getCities = () => req("/cities", { timeout: 12000 });
 export const getNews = (city) =>
   req(`/cities/${encodeURIComponent(city)}/news`, { timeout: 10000 });
 
+// Ambient LLM chatter for the residents currently on screen (sparse + batched).
+// Returns { chatter: { "<agentId>": "<thought>", ... } }.
+export const getChatter = (branchId, ids) =>
+  req(`/branches/${encodeURIComponent(branchId)}/chatter`, {
+    method: "POST",
+    body: { ids },
+    timeout: 15000,
+  });
+
 // Classify a free-form question for a city before polling. Returns either
 // { supported:true, framing, question, description, options } or
 // { supported:false, reason, examples }.

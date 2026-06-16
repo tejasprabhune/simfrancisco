@@ -39,10 +39,12 @@ const ISSUE = {
   s_crime:       ["is it safe to walk home?", "another car break-in", "tired of the break-ins", "where are the cops?", "they took my catalytic converter", "feels less safe lately", "lock your doors out here", "we need real public safety"],
   s_homeless:    ["the city has to help folks outside", "so many tents lately", "this isn't working", "we need more shelters", "compassion, not sweeps", "it breaks my heart", "where's the housing-first plan?", "everyone deserves a roof"],
   s_cost:        ["everything's so expensive", "groceries cost a fortune", "two jobs and still broke", "$18 for a sandwich?!", "this city eats your paycheck", "can I even afford to stay?", "wages haven't kept up", "another surprise fee"],
-  s_environment: ["gotta bike more", "spare-the-air day today", "love these foggy mornings", "save the coast", "more bike lanes please", "ditching the car", "the bay needs protecting", "compost, recycle, repeat"],
+  s_environment: ["gotta bike more", "more bike lanes please", "ditching the car today", "recycle, reuse, repeat", "cleaner air would help", "protect the parks", "climate can't wait", "less plastic, please"],
   s_immigration: ["thinking of family back home", "finally getting my papers", "still new to the city", "sending money home", "learning the ropes here", "proud to be here", "my kids will have it better", "two cultures, one home"],
 };
-const DAILY = ["where's the fog today?", "Muni's late again", "need more coffee", "should've worn a jacket", "these hills are killer", "best burrito spot nearby", "is it Friday yet?", "another Zoom call", "weekend can't come soon", "great day by the bay", "missing the sunshine", "what's for dinner?", "parking is impossible", "love this city honestly", "tourists everywhere today", "the sourdough here though", "Karl the Fog is back", "my feet are killing me", "gotta call mom back", "Giants game tonight?", "off to yoga", "walking the dog", "late for the bus", "dreaming of a burrito"];
+// city-neutral fallback chatter (shown only until the per-resident LLM thought
+// arrives, or if that call fails) — nothing here should name a specific city.
+const DAILY = ["need more coffee", "is it Friday yet?", "another meeting today", "what's for dinner?", "parking is impossible", "walking the dog", "running late again", "weekend can't come soon", "long day ahead", "running errands", "traffic's bad today", "gotta call mom back", "love this city honestly", "should've worn a jacket", "off to the gym", "grabbing lunch soon", "so much on my plate", "almost the weekend", "could use a vacation", "where'd the day go?", "another bill due", "time for a break", "kids to pick up", "my feet are killing me"];
 const POL = {
   prog:  ["the city should do more", "housing is a human right", "tax the rich already", "fund the schools", "we can do better than this"],
   mod:   ["city hall wastes our money", "enough with the spending", "just want it to work", "common sense, please", "fix the basics first"],
@@ -61,10 +63,14 @@ const HOOD = [
   [/Marina|Western Addition/i, ["perfect day by the bay", "brunch by the water", "jog along the marina"]],
 ];
 const YOUNG = ["rent eats my whole check", "trying to make it here", "first apartment grind", "building a life here"];
-const OLD = ["this city's changed so much", "miss the old San Francisco", "watching it all change", "lived here 40 years"];
+const OLD = ["this city's changed so much", "miss how it used to be", "watching it all change", "lived here for decades", "so many new faces now", "the old days were simpler"];
 
 function mulberry32(a) { return function () { a |= 0; a = (a + 0x6d2b79f5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
 const pickFrom = (rng, arr) => arr[(rng() * arr.length) | 0];
+
+// active city slug — the SF-specific neighbourhood flavour only applies to SF;
+// every other city's residents get the LLM thought (or the neutral fallback).
+let CITY = "sf";
 
 function makeThought(a, id) {
   const rng = mulberry32((id >>> 0) * 2654435761 + 12345);
@@ -87,7 +93,7 @@ function makeThought(a, id) {
     if (age > 64 && rng() < 0.6) return pickFrom(rng, OLD);
   }
   if (r < 0.90) {
-    for (const [re, arr] of HOOD) if (re.test(hood)) return pickFrom(rng, arr);
+    if (CITY === "sf") { for (const [re, arr] of HOOD) if (re.test(hood)) return pickFrom(rng, arr); }
     return pickFrom(rng, DAILY);
   }
   // political mood from the value vector
@@ -138,6 +144,9 @@ export class SFMap {
     this.clearT0 = 0; this.clearFade = 1; this.revealCount = 0;
     this.onProgress = null; this.onRevealComplete = null;
     this.bubbleIdx = []; this.bubbleT = 0;   // which sprites currently show a thought bubble
+    this.branchId = null;                          // current branch (for sparse LLM chatter)
+    this.chatterAsked = new Set();                 // resident ids already requested
+    this.onNeedChatter = null;                     // (ids:number[]) => void  — app fetches + setThought
     this._raf = null;
 
     this._loop = this._loop.bind(this);
@@ -149,6 +158,34 @@ export class SFMap {
 
   // legacy hook from the old vector map — the pixel base replaces the outline.
   setOutline() {}
+
+  // Point the chatter system at the active city + branch (clears the request log).
+  setSim(slug, branchId) {
+    CITY = slug || "sf";
+    this.branchId = branchId || null;
+    this.chatterAsked = new Set();
+  }
+
+  // Replace a resident's thought with its LLM-generated one (matched by backend id).
+  setThought(id, text) {
+    if (!text) return;
+    for (const a of this.agents) if (a.seed === id) { a.thought = text; return; }
+  }
+
+  // Ask the app to fetch LLM chatter for the on-screen residents we haven't yet
+  // requested (sparse + batched; results come back through setThought).
+  _requestChatter() {
+    if (!this.branchId || !this.onNeedChatter || !this.bubbleIdx.length) return;
+    const ids = [];
+    for (const i of this.bubbleIdx) {
+      const a = this.agents[i];
+      if (a && a.seed != null && !this.chatterAsked.has(a.seed)) {
+        this.chatterAsked.add(a.seed);
+        ids.push(a.seed);
+      }
+    }
+    if (ids.length) this.onNeedChatter(ids);
+  }
 
   // Swap the city: load a new base tile image (MAP.base/MAP.bbox are already
   // updated by the caller) and rebuild the land mask + overview around it. Agents
@@ -610,6 +647,7 @@ export class SFMap {
       if (picked.every((p) => Math.hypot(p.x - c.x, p.y - c.y) > BUBBLE.sep)) picked.push(c);
     }
     this.bubbleIdx = picked.map((p) => p.i);
+    this._requestChatter();   // sparse LLM chatter for the residents now on screen
   }
 
   _drawBubbles() {

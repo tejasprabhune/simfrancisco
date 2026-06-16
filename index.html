@@ -20,10 +20,17 @@
   <canvas id="map"></canvas>
 
   <div id="ui">
-    <!-- top-left: title (pixel font, all black) + city switcher -->
-    <div class="title-row">
-      <div id="title" class="title">sim francisco</div>
-      <div id="city-switcher" class="city-switcher hidden" role="group" aria-label="Choose a city"></div>
+    <!-- top-left: the title IS the city switcher — a glass column of city titles -->
+    <div id="title-select" class="title-select">
+      <button id="title-btn" class="title title-btn" type="button"
+              aria-haspopup="listbox" aria-expanded="false" aria-label="Switch city">
+        <span id="title-current" class="title-current">sim francisco</span>
+        <svg class="title-caret" viewBox="0 0 24 24" width="17" height="17" aria-hidden="true">
+          <path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"
+                stroke-linejoin="round" d="M6 9l6 6 6-6" />
+        </svg>
+      </button>
+      <div id="title-menu" class="title-menu hidden" role="listbox" aria-label="Cities"></div>
     </div>
 
     <!-- simulation status: city · residents · knowledge-clock (top-right) -->
@@ -89,6 +96,7 @@
       <div class="about-h">The pitch</div>
       <p>What if you could predict how your customers responded to releases before they went out into the real world? Or if you could get a signal on who will win an election?</p>
       <p>We simulated the population of San Francisco distributed across real US Census data and achieved near-parity with these types of real-world events.</p>
+      <p>It now spans <b>five US cities</b> — San Francisco plus <b>neu york</b> (New York City), <b>synth la</b> (Los Angeles), <b>cybercago</b> (Chicago), and <b>simami</b> (Miami) — each its own Census-sampled population. Switch between them from the title in the top-left.</p>
 
       <div class="about-h">Historically predictive</div>
       <p>How do we know if our simulation of SF is accurate? The honest test needs a model whose knowledge cutoff <i>predates</i> the event, so it can't have just memorized the outcome. The older Claude models with a 2023 cutoff have since been <b>retired</b> — so for this leakage-free backtest we ran <b>GPT-4o</b> (knowledge cutoff <b>October 2023</b>) and asked the twin city to predict results it had never seen. (The live app you're using runs the current <b>Claude Sonnet 4.6</b>.)</p>
@@ -108,6 +116,10 @@
       <div class="about-h">The future</div>
       <p>All of decision-making is predicated on our understanding of causality. How will the choices we make influence the world? How will people react?</p>
       <p>To enable (first) SF, and then the world, to understand the causal nature of reality, we present <span class="about-name">sim francisco</span>.</p>
+
+      <div class="about-credit">
+        Built by <b>Tejas Prabhune</b> and <b>Tanmayi Dasari</b> · 2nd place, <b>Claude Build Day</b> (June 13, 2026).
+      </div>
     </div>
 
     <!-- character inspector (tap a character when zoomed in) -->

@@ -68,11 +68,10 @@ body {
   box-shadow: var(--neu);
 }
 
-/* ── title + city switcher (top-left, stacked with deliberate spacing) ──── */
-.title-row {
-  position: absolute; top: 18px; left: 20px;
-  display: flex; flex-direction: column; align-items: flex-start; gap: 10px;
-  max-width: min(420px, calc(100vw - 40px));
+/* ── title-select: the title IS the city switcher (a glass column of titles) ─ */
+.title-select {
+  position: absolute; top: 18px; left: 20px; z-index: 20;
+  max-width: min(440px, calc(100vw - 40px));
 }
 .title {
   font-family: var(--font-title);
@@ -81,76 +80,108 @@ body {
   padding: 11px 16px 9px; border-radius: 14px;
   user-select: none;
 }
+/* the clickable current-city title (reuses the .title glass surface) */
+.title-btn {
+  display: inline-flex; align-items: center; gap: 11px; max-width: 100%;
+  cursor: pointer; color: var(--ink); text-align: left; appearance: none;
+  transition: transform var(--t-fast) var(--ease), box-shadow var(--t) var(--ease);
+}
+.title-btn:hover { transform: translateY(-1px); box-shadow: var(--neu-lg); }
+.title-btn:active { transform: translateY(0); }
+.title-current { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.title-caret { flex: none; color: var(--ink); opacity: .5; transition: transform var(--t-mid) var(--ease); }
+.title-btn[aria-expanded="true"] .title-caret { transform: rotate(180deg); opacity: .85; }
+.title-btn:disabled { cursor: default; opacity: .85; }
+.title-btn:disabled:hover { transform: none; box-shadow: var(--neu); }
 
-/* ── city switcher (a compact glassmorphic pill of city chips) ─────────── */
-.city-switcher {
-  display: flex; flex-wrap: wrap; align-items: center; gap: 4px;
-  padding: 5px; border-radius: 14px;
+/* the dropdown column of city titles */
+.title-menu {
+  margin-top: 8px; display: flex; flex-direction: column; gap: 2px;
+  padding: 6px; border-radius: 14px;
   background: var(--glass);
   backdrop-filter: var(--blur); -webkit-backdrop-filter: var(--blur);
-  border: 1px solid var(--glass-edge);
-  box-shadow: var(--neu);
+  border: 1px solid var(--glass-edge); box-shadow: var(--neu);
   animation: dropIn var(--t-mid) var(--ease-pop);
+  max-height: min(60vh, 440px); overflow-y: auto;
 }
-.city-chip {
-  font-family: var(--font); font-size: 12.5px; font-weight: 600;
-  color: var(--ink-soft); letter-spacing: .01em; white-space: nowrap;
-  padding: 6px 11px; border-radius: 10px; cursor: pointer;
+.title-option {
+  font-family: var(--font-title); font-size: 18px; font-weight: 600;
+  letter-spacing: .02em; line-height: 1; color: var(--ink-soft);
+  text-align: left; white-space: nowrap; cursor: pointer; appearance: none;
+  padding: 9px 13px; border-radius: 10px;
   border: 1px solid transparent; background: transparent;
   transition: background var(--t) var(--ease), color var(--t) var(--ease), transform var(--t-fast) var(--ease);
 }
-.city-chip:hover { color: var(--ink); background: rgba(255, 255, 255, .45); transform: translateY(-1px); }
-.city-chip:active { transform: translateY(0); }
-.city-chip[aria-pressed="true"] {
-  font-family: var(--font-title); font-weight: 600; letter-spacing: .02em;
+.title-option:hover { color: var(--ink); background: rgba(255, 255, 255, .5); transform: translateX(1px); }
+.title-option[aria-selected="true"] {
   color: var(--ink); background: var(--glass-strong);
-  border-color: var(--glass-edge); box-shadow: inset 0 1px 0 var(--glass-hi);
+  box-shadow: inset 0 1px 0 var(--glass-hi);
 }
-.city-chip:disabled { opacity: .55; cursor: default; transform: none; }
+.title-option:disabled { opacity: .55; cursor: default; transform: none; }
 
 /* ── simulation status (top-right) ─────────────────────────────────────── */
 .status {
   position: absolute; top: 20px; right: 20px;
-  font-size: 12.5px; font-weight: 500; letter-spacing: .01em; color: var(--ink-soft);
-  padding: 8px 15px; border-radius: 12px;
-  max-width: min(360px, 62vw);
+  font-size: 14px; font-weight: 500; letter-spacing: .01em; color: var(--ink-soft);
+  padding: 10px 17px; border-radius: 13px;
+  width: min(340px, 64vw);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 /* the clock: the date up to which residents know the news (their knowledge cutoff) */
 .status .status-clock {
   display: block; margin-top: 3px;
-  font-size: 11px; font-weight: 500; color: var(--ink-soft); opacity: .8;
+  font-size: 12px; font-weight: 500; color: var(--ink-soft); opacity: .8;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 
-/* ── fleeting news bubble: the recent headlines that inform the residents ── */
+/* ── news bubble: the recent headlines that inform the residents ─────────── */
+/* same glass + opacity as the rest of the chrome; click to expand all news. */
 .news-bubble {
-  position: absolute; top: 74px; right: 20px;
-  max-width: min(340px, 62vw);
-  display: flex; flex-direction: column; gap: 3px;
-  font-size: 11px; line-height: 1.3; color: var(--ink-soft);
-  padding: 9px 14px; border-radius: 13px;
-  background: var(--glass); opacity: .82; filter: saturate(.9);
+  position: absolute; top: 80px; right: 20px;
+  max-width: min(360px, 64vw);
+  display: flex; flex-direction: column; gap: 5px;
+  font-size: 12.5px; line-height: 1.36; color: var(--ink-soft);
+  padding: 11px 15px; border-radius: 14px;
+  background: var(--glass);
   backdrop-filter: var(--blur); -webkit-backdrop-filter: var(--blur);
   border: 1px solid var(--glass-edge); box-shadow: var(--neu);
+  cursor: pointer;
+  transition: transform var(--t-fast) var(--ease), box-shadow var(--t) var(--ease);
 }
+.news-bubble:hover { transform: translateY(-1px); box-shadow: var(--neu-lg); }
 .news-bubble .news-head {
-  font-size: 9px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
-  color: var(--ink-soft); opacity: .6;
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+  color: var(--ink-soft); opacity: .7;
 }
-.news-bubble .news-item {
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+.news-bubble .news-toggle { flex: none; opacity: .8; transition: transform var(--t-mid) var(--ease); }
+.news-bubble[data-expanded="true"] .news-toggle { transform: rotate(180deg); }
+.news-bubble .news-item { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* expanded: full article list with summaries, scrollable if long */
+.news-bubble[data-expanded="true"] {
+  max-width: min(440px, 78vw); gap: 0;
+  max-height: min(70vh, 540px); overflow-y: auto;
 }
+.news-bubble .news-art {
+  display: flex; flex-direction: column; gap: 2px;
+  padding: 9px 0; border-top: 1px solid var(--glass-edge);
+}
+.news-bubble .news-art:first-of-type { border-top: none; padding-top: 4px; }
+.news-bubble .news-art-date {
+  font-size: 9.5px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; opacity: .6;
+}
+.news-bubble .news-art-head { font-size: 13px; font-weight: 600; color: var(--ink); line-height: 1.3; }
+.news-bubble .news-art-sum { font-size: 12px; line-height: 1.4; opacity: .9; }
 @media (max-width: 560px) { .news-bubble { display: none; } }
 
-/* ── boot progress (thin line under the status while the city wakes) ────── */
+/* ── boot progress: thin line spanning the status bubble, with spacing ──── */
 .boot {
-  position: absolute; top: 58px; right: 20px;
-  width: min(210px, 48vw);
+  position: absolute; top: 80px; right: 20px;
+  width: min(340px, 64vw);     /* matches the status bubble width */
   pointer-events: none;
 }
 .boot-track {
-  height: 5px; border-radius: 999px; overflow: hidden;
+  height: 6px; border-radius: 999px; overflow: hidden;
   background: rgba(255, 255, 255, 0.55);
   border: 1px solid var(--glass-edge);
   box-shadow: inset 0 1px 0 var(--glass-hi), 0 2px 6px rgba(20, 20, 20, 0.1);
@@ -161,12 +192,12 @@ body {
   transition: width .35s var(--ease);
 }
 
-/* ── return-to-overview button (top-left, below the title + city switcher) ── */
+/* ── return-to-overview button (top-left, directly under the title-select) ─ */
 .return {
-  position: absolute; top: 118px; left: 20px;
-  display: flex; align-items: center; gap: 7px;
-  font-family: var(--font); font-size: 13px; font-weight: 600; color: var(--ink);
-  padding: 8px 14px 8px 11px; border-radius: 999px;
+  position: absolute; top: 76px; left: 20px;
+  display: flex; align-items: center; gap: 8px;
+  font-family: var(--font); font-size: 14px; font-weight: 600; color: var(--ink);
+  padding: 9px 15px 9px 12px; border-radius: 999px;
   cursor: pointer; background: var(--glass-strong);
   transition: transform var(--t-fast) var(--ease), box-shadow var(--t) var(--ease), opacity var(--t) var(--ease);
 }
@@ -396,16 +427,20 @@ body {
 .about-ex-nums { display: flex; gap: 16px; flex-wrap: wrap; font-size: 13px; font-weight: 700; }
 .about-ex-nums .actual { color: var(--ink); }
 .about-ex-nums .pred { color: var(--yes); }
+.about-credit {
+  margin-top: 22px; padding-top: 14px; border-top: 1px solid var(--glass-edge);
+  font-size: 13px; line-height: 1.5; color: var(--ink-soft);
+}
+.about-credit b { color: var(--ink); }
 
 /* ── mobile / narrow screens: keep the chrome compact and non-overlapping ── */
 @media (max-width: 560px) {
-  .title-row { top: 12px; left: 12px; gap: 8px; max-width: calc(100vw - 24px); }
-  .title { font-size: 19px; padding: 8px 12px 7px; border-radius: 11px; }
-  .city-switcher { padding: 4px; gap: 3px; border-radius: 11px; }
-  .city-chip { font-size: 11px; padding: 5px 9px; border-radius: 8px; }
-  .status { top: 14px; right: 12px; font-size: 11px; max-width: 52vw; padding: 6px 11px; }
-  .boot { top: 46px; right: 12px; width: min(150px, 52vw); }
-  .return { top: 104px; left: 12px; font-size: 12px; padding: 6px 11px 6px 9px; }
+  .title-select { top: 12px; left: 12px; max-width: calc(100vw - 24px); }
+  .title { font-size: 21px; padding: 9px 13px 8px; border-radius: 11px; }
+  .title-option { font-size: 17px; padding: 8px 12px; }
+  .status { top: 14px; right: 12px; font-size: 12.5px; max-width: 54vw; padding: 8px 12px; }
+  .boot { top: 64px; right: 12px; width: min(160px, 54vw); }
+  .return { top: 70px; left: 12px; font-size: 13px; padding: 8px 13px 8px 10px; }
 
   .dock { bottom: 16px; gap: 9px; max-width: 96vw; }
   .summary, .result-card { width: min(94vw, 440px); }

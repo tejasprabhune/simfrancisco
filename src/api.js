@@ -38,6 +38,25 @@ async function req(path, { method = "GET", body, timeout = 30000, signal } = {})
 
 export const health = () => req("/health", { timeout: 8000 });
 
+// Multi-city catalog. Returns { cities: [{slug, display, prompt_name, bbox, n_pums, knowledge_date, default}] }.
+export const getCities = () => req("/cities", { timeout: 12000 });
+
+// Recent news for a city's bubble. Returns { city, date, articles:[{headline, summary, url}] }.
+export const getNews = (city) =>
+  req(`/cities/${encodeURIComponent(city)}/news`, { timeout: 10000 });
+
+// Classify a free-form question for a city before polling. Returns either
+// { supported:true, framing, question, description, options } or
+// { supported:false, reason, examples }.
+export const parseQuestion = (city, question, signal) =>
+  req(`/cities/${encodeURIComponent(city)}/parse`, {
+    method: "POST",
+    body: { question, model: PREDICT.model },
+    timeout: 60000,
+    signal,
+  });
+
+// `city` rides along in the body (defaults to "sf" server-side when omitted).
 export const createSimulation = (overrides = {}) =>
   req("/simulations", { method: "POST", body: { ...SIM, ...overrides }, timeout: 60000 });
 

@@ -68,15 +68,45 @@ body {
   box-shadow: var(--neu);
 }
 
-/* ── title (top-left, pixel font, all black) ───────────────────────────── */
-.title {
+/* ── title + city switcher (top-left, stacked with deliberate spacing) ──── */
+.title-row {
   position: absolute; top: 18px; left: 20px;
+  display: flex; flex-direction: column; align-items: flex-start; gap: 10px;
+  max-width: min(420px, calc(100vw - 40px));
+}
+.title {
   font-family: var(--font-title);
   font-size: 25px; font-weight: 600; line-height: 1;
   letter-spacing: .02em; color: var(--ink);
   padding: 11px 16px 9px; border-radius: 14px;
   user-select: none;
 }
+
+/* ── city switcher (a compact glassmorphic pill of city chips) ─────────── */
+.city-switcher {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 4px;
+  padding: 5px; border-radius: 14px;
+  background: var(--glass);
+  backdrop-filter: var(--blur); -webkit-backdrop-filter: var(--blur);
+  border: 1px solid var(--glass-edge);
+  box-shadow: var(--neu);
+  animation: dropIn var(--t-mid) var(--ease-pop);
+}
+.city-chip {
+  font-family: var(--font); font-size: 12.5px; font-weight: 600;
+  color: var(--ink-soft); letter-spacing: .01em; white-space: nowrap;
+  padding: 6px 11px; border-radius: 10px; cursor: pointer;
+  border: 1px solid transparent; background: transparent;
+  transition: background var(--t) var(--ease), color var(--t) var(--ease), transform var(--t-fast) var(--ease);
+}
+.city-chip:hover { color: var(--ink); background: rgba(255, 255, 255, .45); transform: translateY(-1px); }
+.city-chip:active { transform: translateY(0); }
+.city-chip[aria-pressed="true"] {
+  font-family: var(--font-title); font-weight: 600; letter-spacing: .02em;
+  color: var(--ink); background: var(--glass-strong);
+  border-color: var(--glass-edge); box-shadow: inset 0 1px 0 var(--glass-hi);
+}
+.city-chip:disabled { opacity: .55; cursor: default; transform: none; }
 
 /* ── simulation status (top-right) ─────────────────────────────────────── */
 .status {
@@ -86,6 +116,32 @@ body {
   max-width: min(360px, 62vw);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
+/* the clock: the date up to which residents know the news (their knowledge cutoff) */
+.status .status-clock {
+  display: block; margin-top: 3px;
+  font-size: 11px; font-weight: 500; color: var(--ink-soft); opacity: .8;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+/* ── fleeting news bubble: the recent headlines that inform the residents ── */
+.news-bubble {
+  position: absolute; top: 74px; right: 20px;
+  max-width: min(340px, 62vw);
+  display: flex; flex-direction: column; gap: 3px;
+  font-size: 11px; line-height: 1.3; color: var(--ink-soft);
+  padding: 9px 14px; border-radius: 13px;
+  background: var(--glass); opacity: .82; filter: saturate(.9);
+  backdrop-filter: var(--blur); -webkit-backdrop-filter: var(--blur);
+  border: 1px solid var(--glass-edge); box-shadow: var(--neu);
+}
+.news-bubble .news-head {
+  font-size: 9px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+  color: var(--ink-soft); opacity: .6;
+}
+.news-bubble .news-item {
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+@media (max-width: 560px) { .news-bubble { display: none; } }
 
 /* ── boot progress (thin line under the status while the city wakes) ────── */
 .boot {
@@ -105,9 +161,9 @@ body {
   transition: width .35s var(--ease);
 }
 
-/* ── return-to-overview button (top-left, below the title with breathing room) ── */
+/* ── return-to-overview button (top-left, below the title + city switcher) ── */
 .return {
-  position: absolute; top: 82px; left: 20px;
+  position: absolute; top: 118px; left: 20px;
   display: flex; align-items: center; gap: 7px;
   font-family: var(--font); font-size: 13px; font-weight: 600; color: var(--ink);
   padding: 8px 14px 8px 11px; border-radius: 999px;
@@ -235,6 +291,32 @@ body {
 .res-why ul { margin: 0; padding-left: 16px; }
 .res-why li { font-size: 12.5px; line-height: 1.5; color: var(--ink); opacity: .9; margin-bottom: 3px; }
 
+/* multi-option result: one horizontal bar per option, sorted desc, winner emphasized */
+.res-options { margin: 13px 0 2px; display: flex; flex-direction: column; gap: 11px; }
+.res-opt-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+.res-opt-label { font-size: 13.5px; font-weight: 600; color: var(--ink); opacity: .88; line-height: 1.25; }
+.res-opt-pct { font-size: 13.5px; font-weight: 700; color: var(--ink-soft); flex: none; }
+.res-opt-track { margin-top: 5px; height: 11px; border-radius: 999px; overflow: hidden; background: rgba(20, 20, 20, 0.08); }
+.res-opt-fill { height: 100%; border-radius: 999px; width: 0%; background: rgba(20, 20, 20, 0.30); transition: width .5s var(--ease); }
+.res-opt.win .res-opt-label { opacity: 1; }
+.res-opt.win .res-opt-pct { color: var(--ink); }
+.res-opt.win .res-opt-fill { background: linear-gradient(90deg, #3a3a3a, var(--ink)); }
+
+/* "try rephrasing" card for unsupported questions (gentle, no red) */
+.res-rephrase-label { font-size: 10px; font-weight: 700; letter-spacing: .13em; text-transform: uppercase; color: var(--ink-soft); margin-bottom: 7px; }
+.res-rephrase-reason { font-size: 14px; font-weight: 500; line-height: 1.45; color: var(--ink); opacity: .9; }
+.res-examples { margin-top: 14px; display: flex; flex-direction: column; gap: 8px; }
+.res-example {
+  text-align: left; width: 100%;
+  font-family: var(--font); font-size: 13px; font-weight: 500; line-height: 1.4; color: var(--ink);
+  padding: 10px 13px; border-radius: 12px; cursor: pointer;
+  border: 1px solid var(--glass-edge); background: rgba(255, 255, 255, .5);
+  box-shadow: inset 0 1px 0 var(--glass-hi);
+  transition: transform var(--t-fast) var(--ease), background var(--t) var(--ease);
+}
+.res-example:hover { transform: translateY(-1px); background: var(--glass-strong); }
+.res-example:active { transform: translateY(0); }
+
 .res-actions { display: flex; gap: 9px; margin-top: 16px; }
 .btn {
   font-family: var(--font); font-size: 13.5px; font-weight: 600;
@@ -317,10 +399,13 @@ body {
 
 /* ── mobile / narrow screens: keep the chrome compact and non-overlapping ── */
 @media (max-width: 560px) {
-  .title { top: 12px; left: 12px; font-size: 19px; padding: 8px 12px 7px; border-radius: 11px; }
+  .title-row { top: 12px; left: 12px; gap: 8px; max-width: calc(100vw - 24px); }
+  .title { font-size: 19px; padding: 8px 12px 7px; border-radius: 11px; }
+  .city-switcher { padding: 4px; gap: 3px; border-radius: 11px; }
+  .city-chip { font-size: 11px; padding: 5px 9px; border-radius: 8px; }
   .status { top: 14px; right: 12px; font-size: 11px; max-width: 52vw; padding: 6px 11px; }
   .boot { top: 46px; right: 12px; width: min(150px, 52vw); }
-  .return { top: 52px; left: 12px; font-size: 12px; padding: 6px 11px 6px 9px; }
+  .return { top: 104px; left: 12px; font-size: 12px; padding: 6px 11px 6px 9px; }
 
   .dock { bottom: 16px; gap: 9px; max-width: 96vw; }
   .summary, .result-card { width: min(94vw, 440px); }

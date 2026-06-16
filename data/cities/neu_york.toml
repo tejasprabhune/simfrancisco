@@ -1,0 +1,473 @@
+# neu york (New York City) — generated from verified civic research.
+slug = "neu_york"
+display = "neu york"
+prompt_name = "New York City"
+demonym = "New Yorker"
+pumas = [4103, 4104, 4107, 4108, 4109, 4110, 4111, 4112, 4121, 4165, 4204, 4205, 4207, 4208, 4209, 4210, 4211, 4212, 4221, 4263, 4301, 4302, 4303, 4304, 4305, 4306, 4307, 4308, 4309, 4310, 4311, 4312, 4313, 4314, 4315, 4316, 4317, 4318, 4401, 4402, 4403, 4404, 4405, 4406, 4407, 4408, 4409, 4410, 4411, 4412, 4413, 4414, 4501, 4502, 4503]
+pums_path = "data/neu_york_pums.csv"
+tiles_path = "server_tiles/neu_york.db"
+religion_weights = [0.32, 0.22, 0.02, 0.26, 0.08, 0.03, 0.01, 0.02, 0.04]
+
+[politics]
+economic_base = -0.32
+social_base = -0.3
+trust_base = -0.05
+change_base = 0.15
+s_housing = 0.92
+s_crime = 0.78
+s_homeless = 0.7
+s_cost = 0.9
+s_environment = 0.5
+s_immigration = 0.6
+vote_facts = "New York City's five-borough electorate is heavily Democratic and diverse: Hillary Clinton took roughly 79% of the citywide vote in 2016 and Joe Biden about 76% in 2020, with Manhattan and the Bronx among the most lopsidedly Democratic counties in the nation while Staten Island leans Republican. The city is majority-minority, with very large Black, Hispanic (Puerto Rican, Dominican, Mexican), and Asian populations, a substantial foreign-born share (around 37%), and the largest Jewish and Catholic communities of any U.S. metro. Voters consistently rank housing affordability and the overall cost of living as top concerns, alongside public safety, homelessness, and the subway and transit system; the city is overwhelmingly renter-occupied and rent-regulated. Turnout in municipal contests is low and dominated by closed Democratic primaries, and trust in city institutions like the NYPD, the MTA, and City Hall is uneven across neighborhoods and racial lines."
+belief_facts = "New York holds closed party primaries (no top-two); in heavily Democratic New York City the Democratic primary is effectively decisive, and municipal primaries use ranked-choice voting."
+
+[work]
+downtown_puma = 4165
+downtown_share = 0.45
+
+[[neighborhoods]]
+puma = 4103
+label = "the Lower East Side / Chinatown"
+[[neighborhoods]]
+puma = 4104
+label = "Chelsea / Hell's Kitchen"
+[[neighborhoods]]
+puma = 4107
+label = "the Upper West Side"
+[[neighborhoods]]
+puma = 4108
+label = "the Upper East Side / Roosevelt Island"
+[[neighborhoods]]
+puma = 4109
+label = "Morningside / Hamilton Heights"
+[[neighborhoods]]
+puma = 4110
+label = "Harlem"
+[[neighborhoods]]
+puma = 4111
+label = "East Harlem"
+[[neighborhoods]]
+puma = 4112
+label = "Washington Heights / Inwood"
+[[neighborhoods]]
+puma = 4121
+label = "the Financial District / Greenwich Village"
+[[neighborhoods]]
+puma = 4165
+label = "Midtown / Flatiron"
+[[neighborhoods]]
+puma = 4204
+label = "Highbridge / Concourse (Bronx)"
+[[neighborhoods]]
+puma = 4205
+label = "Morris Heights / Mount Hope (Bronx)"
+[[neighborhoods]]
+puma = 4207
+label = "Fordham / Bedford Park / Norwood (Bronx)"
+[[neighborhoods]]
+puma = 4208
+label = "Riverdale / Kingsbridge (Bronx)"
+[[neighborhoods]]
+puma = 4209
+label = "Soundview / Parkchester (Bronx)"
+[[neighborhoods]]
+puma = 4210
+label = "Co-op City / Throgs Neck (Bronx)"
+[[neighborhoods]]
+puma = 4211
+label = "Pelham Parkway / Morris Park (Bronx)"
+[[neighborhoods]]
+puma = 4212
+label = "Williamsbridge / Wakefield / Eastchester (Bronx)"
+[[neighborhoods]]
+puma = 4221
+label = "Mott Haven / Hunts Point (Bronx)"
+[[neighborhoods]]
+puma = 4263
+label = "Morrisania / Tremont / Belmont (Bronx)"
+[[neighborhoods]]
+puma = 4301
+label = "Williamsburg / Greenpoint (Brooklyn)"
+[[neighborhoods]]
+puma = 4302
+label = "Brooklyn Heights / Fort Greene"
+[[neighborhoods]]
+puma = 4303
+label = "Bedford-Stuyvesant"
+[[neighborhoods]]
+puma = 4304
+label = "Bushwick"
+[[neighborhoods]]
+puma = 4305
+label = "East New York / Starrett City"
+[[neighborhoods]]
+puma = 4306
+label = "Park Slope / Carroll Gardens"
+[[neighborhoods]]
+puma = 4307
+label = "Sunset Park / Windsor Terrace"
+[[neighborhoods]]
+puma = 4308
+label = "Crown Heights North / Prospect Heights"
+[[neighborhoods]]
+puma = 4309
+label = "Crown Heights South / Wingate"
+[[neighborhoods]]
+puma = 4310
+label = "Bay Ridge / Dyker Heights"
+[[neighborhoods]]
+puma = 4311
+label = "Bensonhurst / Bath Beach"
+[[neighborhoods]]
+puma = 4312
+label = "Borough Park / Kensington"
+[[neighborhoods]]
+puma = 4313
+label = "Coney Island / Brighton Beach"
+[[neighborhoods]]
+puma = 4314
+label = "Flatbush / Midwood"
+[[neighborhoods]]
+puma = 4315
+label = "Sheepshead Bay / Gravesend"
+[[neighborhoods]]
+puma = 4316
+label = "Brownsville / Ocean Hill"
+[[neighborhoods]]
+puma = 4317
+label = "East Flatbush"
+[[neighborhoods]]
+puma = 4318
+label = "Canarsie / Flatlands"
+[[neighborhoods]]
+puma = 4401
+label = "Astoria / Long Island City (Queens)"
+[[neighborhoods]]
+puma = 4402
+label = "Sunnyside / Woodside (Queens)"
+[[neighborhoods]]
+puma = 4403
+label = "Jackson Heights / East Elmhurst (Queens)"
+[[neighborhoods]]
+puma = 4404
+label = "Elmhurst / Corona (Queens)"
+[[neighborhoods]]
+puma = 4405
+label = "Ridgewood / Maspeth / Middle Village (Queens)"
+[[neighborhoods]]
+puma = 4406
+label = "Rego Park / Forest Hills (Queens)"
+[[neighborhoods]]
+puma = 4407
+label = "Flushing / Whitestone (Queens)"
+[[neighborhoods]]
+puma = 4408
+label = "Bayside / Little Neck (Queens)"
+[[neighborhoods]]
+puma = 4409
+label = "Briarwood / Fresh Meadows (Queens)"
+[[neighborhoods]]
+puma = 4410
+label = "Richmond Hill / Woodhaven (Queens)"
+[[neighborhoods]]
+puma = 4411
+label = "Howard Beach / Ozone Park (Queens)"
+[[neighborhoods]]
+puma = 4412
+label = "Jamaica / St. Albans / Hollis (Queens)"
+[[neighborhoods]]
+puma = 4413
+label = "Queens Village / Cambria Heights (Queens)"
+[[neighborhoods]]
+puma = 4414
+label = "the Rockaways / Broad Channel (Queens)"
+[[neighborhoods]]
+puma = 4501
+label = "the North Shore (Staten Island)"
+[[neighborhoods]]
+puma = 4502
+label = "Mid-Island (Staten Island)"
+[[neighborhoods]]
+puma = 4503
+label = "the South Shore (Staten Island)"
+
+# PUMA -> chunk-grid centroid {cx, cy, radius_chunks}, auto-generated by
+# tools/compute_centroids.py from TIGER 2020 PUMA polygons clipped to the map
+# bbox + reprojected to this city's UTM zone. Off-map (county) PUMAs are
+# clamped to the nearest grid edge; water centroids snapped to nearest land.
+[[centroids]]
+puma = 4103
+cx = 24
+cy = 91
+radius = 7
+[[centroids]]
+puma = 4104
+cx = 17
+cy = 74
+radius = 7
+[[centroids]]
+puma = 4107
+cx = 26
+cy = 61
+radius = 9
+[[centroids]]
+puma = 4108
+cx = 33
+cy = 68
+radius = 8
+[[centroids]]
+puma = 4109
+cx = 32
+cy = 46
+radius = 7
+[[centroids]]
+puma = 4110
+cx = 36
+cy = 48
+radius = 7
+[[centroids]]
+puma = 4111
+cx = 40
+cy = 57
+radius = 9
+[[centroids]]
+puma = 4112
+cx = 39
+cy = 29
+radius = 10
+[[centroids]]
+puma = 4121
+cx = 16
+cy = 92
+radius = 12
+[[centroids]]
+puma = 4165
+cx = 26
+cy = 78
+radius = 8
+[[centroids]]
+puma = 4204
+cx = 44
+cy = 40
+radius = 6
+[[centroids]]
+puma = 4205
+cx = 48
+cy = 31
+radius = 5
+[[centroids]]
+puma = 4207
+cx = 54
+cy = 23
+radius = 8
+[[centroids]]
+puma = 4208
+cx = 47
+cy = 15
+radius = 11
+[[centroids]]
+puma = 4209
+cx = 65
+cy = 45
+radius = 10
+[[centroids]]
+puma = 4210
+cx = 84
+cy = 34
+radius = 18
+[[centroids]]
+puma = 4211
+cx = 67
+cy = 29
+radius = 8
+[[centroids]]
+puma = 4212
+cx = 66
+cy = 16
+radius = 13
+[[centroids]]
+puma = 4221
+cx = 52
+cy = 51
+radius = 11
+[[centroids]]
+puma = 4263
+cx = 55
+cy = 34
+radius = 11
+[[centroids]]
+puma = 4301
+cx = 36
+cy = 91
+radius = 9
+[[centroids]]
+puma = 4302
+cx = 25
+cy = 101
+radius = 7
+[[centroids]]
+puma = 4303
+cx = 39
+cy = 104
+radius = 6
+[[centroids]]
+puma = 4304
+cx = 46
+cy = 101
+radius = 7
+[[centroids]]
+puma = 4305
+cx = 58
+cy = 113
+radius = 11
+[[centroids]]
+puma = 4306
+cx = 23
+cy = 106
+radius = 12
+[[centroids]]
+puma = 4307
+cx = 25
+cy = 110
+radius = 11
+[[centroids]]
+puma = 4308
+cx = 36
+cy = 110
+radius = 7
+[[centroids]]
+puma = 4309
+cx = 36
+cy = 115
+radius = 5
+[[centroids]]
+puma = 4310
+cx = 28
+cy = 115
+radius = 10
+[[centroids]]
+puma = 4311
+cx = 34
+cy = 128
+radius = 9
+[[centroids]]
+puma = 4312
+cx = 31
+cy = 122
+radius = 8
+[[centroids]]
+puma = 4313
+cx = 37
+cy = 136
+radius = 16
+[[centroids]]
+puma = 4314
+cx = 34
+cy = 128
+radius = 8
+[[centroids]]
+puma = 4315
+cx = 40
+cy = 143
+radius = 10
+[[centroids]]
+puma = 4316
+cx = 48
+cy = 113
+radius = 6
+[[centroids]]
+puma = 4317
+cx = 40
+cy = 122
+radius = 8
+[[centroids]]
+puma = 4318
+cx = 56
+cy = 138
+radius = 18
+[[centroids]]
+puma = 4401
+cx = 50
+cy = 67
+radius = 14
+[[centroids]]
+puma = 4402
+cx = 43
+cy = 80
+radius = 10
+[[centroids]]
+puma = 4403
+cx = 59
+cy = 73
+radius = 7
+[[centroids]]
+puma = 4404
+cx = 66
+cy = 80
+radius = 13
+[[centroids]]
+puma = 4405
+cx = 55
+cy = 94
+radius = 12
+[[centroids]]
+puma = 4406
+cx = 68
+cy = 88
+radius = 7
+[[centroids]]
+puma = 4407
+cx = 80
+cy = 64
+radius = 18
+[[centroids]]
+puma = 4408
+cx = 86
+cy = 87
+radius = 12
+[[centroids]]
+puma = 4409
+cx = 71
+cy = 100
+radius = 9
+[[centroids]]
+puma = 4410
+cx = 73
+cy = 114
+radius = 11
+[[centroids]]
+puma = 4411
+cx = 99
+cy = 72
+radius = 14
+[[centroids]]
+puma = 4412
+cx = 93
+cy = 102
+radius = 12
+[[centroids]]
+puma = 4413
+cx = 107
+cy = 98
+radius = 18
+[[centroids]]
+puma = 4414
+cx = 78
+cy = 144
+radius = 18
+[[centroids]]
+puma = 4501
+cx = 27
+cy = 113
+radius = 4
+[[centroids]]
+puma = 4502
+cx = 34
+cy = 128
+radius = 8
+[[centroids]]
+puma = 4503
+cx = 35
+cy = 133
+radius = 7

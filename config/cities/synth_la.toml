@@ -1,0 +1,46 @@
+# synth la (Los Angeles) — UTM Zone 11N.
+
+[pipeline]
+meters_per_cell = 2.0
+chunk_meters    = 250.0
+lod_levels      = 6
+# LA has high relief (basin 30 m+, foothills to 1288 m). Cap the water flood at a
+# low coastal elevation so it captures Santa Monica Bay but cannot climb inland
+# undeveloped ground and flood the basin/foothills. The Pacific reads as 0 m.
+water_max_elev_m = 3.0
+
+[crs]
+utm_epsg = "EPSG:32611"
+
+[bbox_wgs84]
+west  = -118.62
+south =   33.93
+east  = -118.16
+north =   34.25
+
+# Downtown LA — inland, on the single contiguous LA-basin landmass.
+[land_ref]
+lon = -118.25
+lat =   34.05
+
+[paths]
+osm_pbf   = "data/synth_la.osm.pbf"
+dem_tif   = "data/synth_la_dem.tif"
+output_db = "artifacts/tiles_synth_la.db"
+mapping_json = "artifacts/mapping_synth_la.json"
+
+[elevation]
+walkable_threshold_m = 1.5
+flatten_buildings    = true
+
+[collision]
+building_floor_blocked = true
+
+[atlas]
+tile_width  = 32
+tile_height = 32
+columns     = 47
+path = "assets/atlas.png"
+
+[verify]
+test_chunks = []

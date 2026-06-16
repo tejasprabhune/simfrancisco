@@ -1,0 +1,156 @@
+meta:
+  validation_n: 2000
+  default_seed: 42
+  notes: 'synth_la rubric: leakage-free gpt-4o (Oct-2023 cutoff) backtest of certified 2024 Los Angeles
+    County results (presidential two-party + ballot measures, web-verified against two independent sources)
+    + direction-only counterfactuals. Targets are frozen certified ground truth; only persona/prompt/aggregation
+    may be tuned.'
+weights:
+  elections_measures: 1.0
+  resolved_markets_sf_informative: 0.0
+  resolved_markets_general: 0.0
+  live_markets: 0.0
+  counterfactuals: 1.0
+thresholds:
+  weighted_score_min: 0.7
+  elections_measures_max_abs_err: 0.07
+  resolved_markets_max_brier: 0.18
+  counterfactual_direction_min: 0.8
+elections_measures:
+- id: us_president_2024_two_party_dem_share_la_county
+  as_of_date: '2024-11-04'
+  model: gpt-4o
+  population: cvap_likely_voter
+  question: Of the two major-party presidential votes cast in Los Angeles County, what share went to Democrat
+    Kamala Harris over Republican Donald Trump?
+  description: 'This is the certified Los Angeles County two-party presidential share: Harris votes divided
+    by (Harris + Trump votes). Certified county totals were Harris 2,417,109 and Trump 1,189,862, giving
+    a two-party Democratic share of 0.6701. By 2024 LA County was a longtime Democratic stronghold (Biden
+    won it by roughly 71% to 27% in 2020), but Harris ran somewhat behind Biden amid a statewide and nationwide
+    rightward shift, high concern about cost of living, housing, and homelessness, and notable rightward
+    movement in Latino and Asian-heavy parts of the county. A higher number means a more Democratic county
+    margin.'
+  target_share: 0.6701
+  tolerance: 0.05
+- id: la_county_measure_a_2024_homelessness_sales_tax
+  as_of_date: '2024-11-04'
+  model: gpt-4o
+  population: cvap_likely_voter
+  question: Shall Los Angeles County repeal the existing quarter-cent Measure H sales tax and replace
+    it with a permanent half-cent sales tax to fund homeless services, mental health and addiction treatment,
+    and affordable housing?
+  description: Measure A replaced the expiring 2017 quarter-cent Measure H sales tax with a permanent
+    half-cent (0.5%) countywide sales tax, projected to raise roughly $1.1 billion a year for homelessness
+    services and affordable housing, with new accountability and oversight provisions and no sunset date.
+    Voters faced this amid record visible homelessness across LA County (well over 70,000 unhoused residents
+    counted), widespread frustration with encampments, and skepticism about how prior homelessness spending
+    had performed. YES meant raising the sales tax to keep and expand homelessness funding; NO meant letting
+    Measure H expire without replacement. It passed with a certified 57.78% YES in the county.
+  target_share: 0.5778
+  tolerance: 0.06
+- id: la_county_measure_g_2024_governance_charter
+  as_of_date: '2024-11-04'
+  model: gpt-4o
+  population: cvap_likely_voter
+  question: Shall the Los Angeles County charter be amended to expand the Board of Supervisors from five
+    to nine members, create a directly elected County Executive, and add an independent ethics commission
+    and a nonpartisan legislative analyst?
+  description: Measure G is the most significant overhaul of LA County government structure since the
+    1912 charter. It expands the Board of Supervisors from five to nine elected members (each supervisor
+    currently represents about 2 million residents), creates a powerful directly elected County Executive,
+    and establishes an independent ethics commission and a legislative analyst, with changes phasing in
+    through 2028-2032. Supporters argued five supervisors cannot adequately represent 10 million residents;
+    opponents (including some sitting supervisors and labor groups) warned of added cost and concentrated
+    executive power. YES meant approving the expansion and reforms. It narrowly passed with a certified
+    51.62% YES.
+  target_share: 0.5162
+  tolerance: 0.06
+- id: ca_prop_36_2024_penalties_la_county
+  as_of_date: '2024-11-04'
+  model: gpt-4o
+  population: cvap_likely_voter
+  question: Shall California increase penalties for certain theft and drug crimes, partially rolling back
+    the 2014 Proposition 47 reforms by allowing some misdemeanors to be charged as felonies?
+  description: Proposition 36 increased criminal penalties for certain repeat theft and hard-drug offenses,
+    allowing some crimes that Proposition 47 had reduced to misdemeanors in 2014 to again be charged as
+    felonies, and created a treatment-focused 'treatment-mandated felony' for some drug possession. It
+    rode a wave of public concern over retail theft, smash-and-grab incidents, and open-air drug use;
+    it was opposed by Governor Newsom and many progressive groups who said it revived failed war-on-drugs
+    policy. YES meant toughening penalties. Statewide it passed overwhelmingly (about 68%); even heavily
+    Democratic LA County backed it, with a certified 64.4% YES.
+  target_share: 0.644
+  tolerance: 0.06
+- id: ca_prop_6_2024_forced_inmate_labor_la_county
+  as_of_date: '2024-11-04'
+  model: gpt-4o
+  population: cvap_likely_voter
+  question: Shall the California Constitution be amended to remove language allowing involuntary servitude
+    as criminal punishment, prohibiting forcing incarcerated people to work?
+  description: Proposition 6 was a legislatively referred constitutional amendment to delete the state
+    constitution's exception that permitted involuntary servitude 'to punish crime,' barring prisons from
+    forcing incarcerated people to work and requiring that prison labor be voluntary. Framed as part of
+    national efforts to end slavery-era language in state constitutions, it had broad legislative support
+    and little organized opposition but limited public attention. YES meant ending forced prison labor.
+    It narrowly failed statewide (about 46-47%); in LA County it passed with a certified 54.0% YES.
+  target_share: 0.54
+  tolerance: 0.06
+- id: ca_prop_33_2024_rent_control_la_county
+  as_of_date: '2024-11-04'
+  model: gpt-4o
+  population: cvap_likely_voter
+  question: Shall California repeal the Costa-Hawkins Rental Housing Act, allowing cities and counties
+    to enact rent control on any housing, including single-family homes and newer buildings?
+  description: Proposition 33 would have repealed the 1995 Costa-Hawkins Act, which bars rent control
+    on single-family homes, condos, and housing built after February 1995, and limits 'vacancy control.'
+    Repeal would let local governments adopt much broader rent control. This was the third such attempt
+    in recent years (after failed 2018 Prop 10 and 2020 Prop 21), backed by the AIDS Healthcare Foundation
+    and tenant groups, opposed by landlords, builders, and many economists who warned it could reduce
+    housing supply. YES meant expanding local rent-control authority. It failed statewide (about 39%);
+    in LA County, a tenant-heavy region, it still fell short with a certified 45.0% YES.
+  target_share: 0.45
+  tolerance: 0.06
+- id: ca_prop_4_2024_climate_water_bond_la_county
+  as_of_date: '2024-11-04'
+  model: gpt-4o
+  population: cvap_likely_voter
+  question: Shall California issue $10 billion in general obligation bonds to fund water, wildfire prevention,
+    drought, flooding, extreme heat, and other climate and environmental projects?
+  description: Proposition 4 authorized $10 billion in state general obligation bonds for climate and
+    environmental projects, including safe drinking water, wildfire and forest resilience, drought and
+    flood protection, coastal resilience, and extreme-heat mitigation, with about 40% directed to lower-income
+    communities. It came after years of destructive California wildfires, drought, and flooding. Supporters
+    cited mounting climate risk; opponents pointed to the long-term repayment cost (roughly $400 million
+    per year for 40 years). YES meant approving the borrowing. It passed statewide (about 60%); in LA
+    County it carried with a certified 64.5% YES.
+  target_share: 0.645
+  tolerance: 0.06
+resolved_markets:
+  sf_opinion_informative: []
+  general_knowledge: []
+counterfactuals:
+- id: cf_homeless_crisis_raises_housing_tax_support
+  as_of_date: '2023-06-01'
+  model: gpt-4o
+  framing: vote
+  population: cvap_likely_voter
+  question: Do you support a countywide tax measure that funds expanded homeless housing and services
+    in Los Angeles?
+  description: Do you support a countywide tax measure that funds expanded homeless housing and services
+    in Los Angeles?
+  event: A widely covered new count shows unsheltered homelessness rising sharply across the county, with
+    large encampments spreading into more neighborhoods and businesses and residents demanding action,
+    dominating local news for weeks.
+  expected_direction: up
+- id: cf_corruption_scandal_lowers_tax_support
+  as_of_date: '2023-06-01'
+  model: gpt-4o
+  framing: vote
+  population: cvap_likely_voter
+  question: Do you support giving Los Angeles County and City government a new general tax increase to
+    expand their budgets?
+  description: Do you support giving Los Angeles County and City government a new general tax increase
+    to expand their budgets?
+  event: A major corruption scandal breaks in which senior LA city and county officials are indicted for
+    steering contracts to associates and misusing tens of millions in public funds, dominating local news
+    for weeks.
+  expected_direction: down

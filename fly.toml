@@ -8,7 +8,7 @@ primary_region = "sjc"
 
 [env]
   RUST_LOG = "info"
-  TILES_DB = "tiles.db"
+  TILES_DB = "server_tiles/sf.db"
   # 10k-agent polls cluster into ≤160 archetypes (~3 batched LLM calls), so latency
   # tracks the call count, not N. Higher in-flight cap parallelizes those calls.
   MODEL_MAX_INFLIGHT = "16"
@@ -30,4 +30,6 @@ primary_region = "sjc"
 
 [[vm]]
   size = "shared-cpu-1x"
-  memory = "1gb"
+  # 5 cities' PUMS in RAM (~240k records) + lazy on-disk slim tiles + per-request
+  # populations. 2 GB gives headroom over the ~1 GB working set.
+  memory = "2gb"

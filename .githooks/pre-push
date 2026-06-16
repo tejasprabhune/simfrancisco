@@ -4,8 +4,8 @@
 set -euo pipefail
 cd "$(git rev-parse --show-toplevel)"
 
-echo "[pre-push] cargo test ..."
-cargo test --quiet
+echo "[pre-push] cargo test --workspace ..."
+cargo test --workspace --quiet
 
 echo "[pre-push] cargo build --release --bin validate ..."
 cargo build --release --bin validate --quiet

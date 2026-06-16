@@ -1,0 +1,107 @@
+meta:
+  validation_n: 2000
+  default_seed: 42
+  notes: 'simami rubric: leakage-free gpt-4o (Oct-2023 cutoff) backtest of certified 2024 Miami-Dade County
+    results (presidential two-party + ballot measures, web-verified against two independent sources) +
+    direction-only counterfactuals. Targets are frozen certified ground truth; only persona/prompt/aggregation
+    may be tuned.'
+weights:
+  elections_measures: 1.0
+  resolved_markets_sf_informative: 0.0
+  resolved_markets_general: 0.0
+  live_markets: 0.0
+  counterfactuals: 1.0
+thresholds:
+  weighted_score_min: 0.7
+  elections_measures_max_abs_err: 0.07
+  resolved_markets_max_brier: 0.18
+  counterfactual_direction_min: 0.8
+elections_measures:
+- id: fl_president_2024_miami_dade_two_party_dem
+  as_of_date: '2024-11-04'
+  model: gpt-4o
+  population: cvap_likely_voter
+  question: 'Two-party vote: what share of the Harris+Trump vote in Miami-Dade County went to Kamala Harris
+    (Democrat)?'
+  description: 'Certified Miami-Dade County presidential result, expressed as the two-party Democratic
+    share: Harris votes divided by (Harris + Trump). Miami-Dade had been a Democratic stronghold for decades
+    (Clinton won it by ~30 points in 2016, Biden by ~7 in 2020), but heading into November 2024 polls
+    showed Trump making historic gains with the county''s large Cuban, Venezuelan, and Colombian electorate
+    amid inflation and immigration concerns. A voter in 2024 would have sensed the county tightening dramatically.
+    Trump ultimately carried Miami-Dade 605,590 (55.19%) to Harris''s 480,355 (43.78%) - the first GOP
+    presidential win in the county since 1988. A higher number means a larger Democratic share of the
+    two-party vote.'
+  target_share: 0.4424
+  tolerance: 0.05
+- id: fl_amend_4_2024_abortion
+  as_of_date: '2024-11-04'
+  model: gpt-4o
+  population: cvap_likely_voter
+  question: Should the Florida Constitution be amended so that no law may prohibit, penalize, delay, or
+    restrict abortion before viability or when necessary to protect the patient's health, as determined
+    by the patient's healthcare provider? (YES/NO)
+  description: 'A citizen-initiated state constitutional amendment to bar government restrictions on abortion
+    before fetal viability. It came after Florida''s 6-week abortion ban took effect in May 2024, which
+    sharply curtailed access across the South. Amendments need 60% YES statewide to pass. In heavily Democratic,
+    heavily Catholic-and-Hispanic Miami-Dade, the measure won a clear local majority but the state fell
+    short. Certified Miami-Dade result: 618,188 YES (58.69%) to 435,185 NO (41.31%). YES means enshrining
+    abortion rights up to viability in the state constitution.'
+  target_share: 0.5869
+  tolerance: 0.06
+- id: fl_amend_3_2024_marijuana
+  as_of_date: '2024-11-04'
+  model: gpt-4o
+  population: cvap_likely_voter
+  question: Should the Florida Constitution be amended to allow adults 21 and older to possess and use
+    marijuana for non-medical personal use, with sales through existing licensed medical-marijuana centers
+    and other state-licensed entities? (YES/NO)
+  description: 'A citizen-initiated amendment to legalize recreational marijuana for adults 21+, building
+    on Florida''s existing medical-marijuana program (legal since 2016). The campaign was heavily funded
+    by cannabis company Trulieve and opposed by Gov. DeSantis. Amendments need 60% YES statewide to pass.
+    The measure failed statewide (~56%) and even fell just short of a simple majority in Miami-Dade. Certified
+    Miami-Dade result: 510,124 YES (49.26%) to 525,479 NO (50.74%). YES means legalizing recreational
+    marijuana for adults.'
+  target_share: 0.4926
+  tolerance: 0.06
+- id: fl_amend_2_2024_hunt_fish
+  as_of_date: '2024-11-04'
+  model: gpt-4o
+  population: cvap_likely_voter
+  question: Should the Florida Constitution be amended to preserve forever fishing and hunting, including
+    by traditional methods, as a public right and a preferred means of responsibly managing and controlling
+    fish and wildlife? (YES/NO)
+  description: 'A legislatively referred amendment establishing a constitutional right to fish and hunt
+    and declaring it the preferred method of wildlife management. It was largely uncontroversial and broadly
+    popular across party lines, with little organized opposition. Amendments need 60% YES statewide; this
+    one passed easily statewide (~67%) and carried Miami-Dade as well. Certified Miami-Dade result: 659,670
+    YES (65.45%) to 348,269 NO (34.55%). YES means adding a right to fish and hunt to the state constitution.'
+  target_share: 0.6545
+  tolerance: 0.06
+resolved_markets:
+  sf_opinion_informative: []
+  general_knowledge: []
+counterfactuals:
+- id: cf_socialism_attack_lowers_dem_support
+  as_of_date: '2023-06-01'
+  model: gpt-4o
+  framing: vote
+  population: cvap_likely_voter
+  question: Do you support the Democratic candidate in an upcoming Miami-Dade election?
+  description: Do you support the Democratic candidate in an upcoming Miami-Dade election?
+  event: A high-profile, heavily-aired campaign blitzes Spanish-language Miami media tying the Democratic
+    candidate to socialist and communist regimes in Cuba, Venezuela, and Nicaragua, dominating local talk
+    radio and TV for weeks.
+  expected_direction: down
+- id: cf_insurance_crisis_raises_cost_relief_support
+  as_of_date: '2023-06-01'
+  model: gpt-4o
+  framing: vote
+  population: cvap_likely_voter
+  question: Do you support a state-funded program that subsidizes home and flood insurance to lower premiums
+    for Miami-Dade homeowners?
+  description: Do you support a state-funded program that subsidizes home and flood insurance to lower
+    premiums for Miami-Dade homeowners?
+  event: Several major property insurers announce they are pulling out of Florida and remaining carriers
+    post steep premium hikes, sending homeowners' insurance and rent costs sharply higher across Miami-Dade,
+    dominating local news.
+  expected_direction: up

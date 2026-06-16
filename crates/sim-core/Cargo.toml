@@ -1,0 +1,55 @@
+[package]
+name = "simfrancisco"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.80"
+description = "SF digital-twin backend: synthetic-population prediction engine + life simulation"
+
+[lib]
+name = "simfrancisco"
+path = "src/lib.rs"
+
+[[bin]]
+name = "server"
+path = "src/bin/server.rs"
+
+[[bin]]
+name = "validate"
+path = "src/bin/validate.rs"
+
+[[bin]]
+name = "ingest_pums"
+path = "src/bin/ingest_pums.rs"
+
+[[bin]]
+name = "daemon"
+path = "src/bin/daemon.rs"
+
+[dependencies]
+tokio = { version = "1", features = ["full"] }
+axum = { version = "0.7", features = ["macros"] }
+tower-http = { version = "0.5", features = ["cors", "trace"] }
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls", "gzip", "stream"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+serde_yaml = "0.9"
+toml = "0.8"
+rusqlite = { version = "0.31", features = ["bundled"] }
+zstd = "0.13"
+rand = "0.8"
+rand_chacha = "0.3"
+sha2 = "0.10"
+hex = "0.4"
+anyhow = "1"
+thiserror = "1"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+futures = "0.3"
+tokio-stream = "0.1"
+async-stream = "0.3"
+clap = { version = "4", features = ["derive"] }
+chrono = { version = "0.4", features = ["serde"] }
+once_cell = "1"
+
+[dev-dependencies]
+tempfile = "3"

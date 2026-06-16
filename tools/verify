@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+# Verification harness wrapper for the SF map beautification work.
+#
+#   tools/verify              run checks against the current assets/atlas.png
+#   tools/verify --rebuild    rebuild atlas + facade_atlas from MX first, then check
+#
+# Renders the three iconic test chunks to verify_out/*.png and runs V1-V8
+# (see src/bin/verify.rs), writing verify_out/report.txt. Also performs an
+# end-to-end determinism check: two full render passes must be byte-identical.
+set -euo pipefail
+cd "$(dirname "$0")/.."
+
+REBUILD=0
+[[ "${1:-}" == "--rebuild" ]] && REBUILD=1
+
+echo ">> building binaries (release)"
+cargo build --release --bin verify --bin build_atlas --bin build_facade_atlas 2>&1 | tail -3 || {
+  echo "build failed"; exit 1;
+}
+
+if [[ "$REBUILD" == "1" ]]; then
+  echo ">> rebuilding atlas + facade_atlas from MX"
+  cargo run --release --bin build_atlas
+  cargo run --release --bin build_facade_atlas
+fi
+
+echo ">> render pass 1 + checks"
+cargo run --release --bin verify
+
+# End-to-end determinism: render again and diff the PNGs (V7 augmentation).
+echo ">> render pass 2 (determinism diff)"
+mkdir -p /tmp/verify_pass2
+for f in verify_out/*_detail.png; do
+  cp "$f" "/tmp/verify_pass2/$(basename "$f").a"
+done
+cargo run --release --bin verify >/dev/null
+DET_OK=1
+for f in verify_out/*_detail.png; do
+  if ! cmp -s "$f" "/tmp/verify_pass2/$(basename "$f").a"; then
+    echo "NONDETERMINISTIC: $f changed between passes"
+    DET_OK=0
+  fi
+done
+[[ "$DET_OK" == "1" ]] && echo ">> end-to-end determinism: OK (all PNGs byte-identical across passes)"
+
+echo ""
+echo "=== report (verify_out/report.txt) ==="
+cat verify_out/report.txt

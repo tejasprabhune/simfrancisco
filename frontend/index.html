@@ -20,11 +20,17 @@
   <canvas id="map"></canvas>
 
   <div id="ui">
-    <!-- top-left: title (pixel font, all black) -->
-    <div id="title" class="title">sim francisco</div>
+    <!-- top-left: title (pixel font, all black) + city switcher -->
+    <div class="title-row">
+      <div id="title" class="title">sim francisco</div>
+      <div id="city-switcher" class="city-switcher hidden" role="group" aria-label="Choose a city"></div>
+    </div>
 
-    <!-- simulation status: SF · residents · date (top-right) -->
+    <!-- simulation status: city · residents · knowledge-clock (top-right) -->
     <div id="status" class="status">waking the city…</div>
+
+    <!-- fleeting news bubble: the recent headlines that inform the residents -->
+    <div id="news-bubble" class="news-bubble hidden" aria-live="polite"></div>
 
     <!-- boot progress: a thin line that fills while the city wakes -->
     <div id="boot" class="boot hidden" aria-hidden="true">

@@ -15,3 +15,17 @@ fly.toml.bak
 
 cache.db
 .claude
+
+# map pipeline: large raw inputs + intermediates (not committed; fetched/derived)
+/data/raw
+/data/*.osm.pbf
+/data/*_dem.tif
+# per-city map build outputs (baked into the deploy image, not git)
+/artifacts
+/mapping.json
+mapping_*.json
+
+# scratch / stray build artifacts (not source)
+/verify_out
+/crates/sim-core/tiles.db
+data/*.aux.xml

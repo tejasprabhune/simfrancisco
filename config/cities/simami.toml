@@ -1,0 +1,45 @@
+# simami (Miami) — UTM Zone 17N.
+
+[pipeline]
+meters_per_cell = 2.0
+chunk_meters    = 250.0
+lod_levels      = 6
+
+[crs]
+utm_epsg = "EPSG:32617"
+
+[bbox_wgs84]
+west  = -80.33
+south =  25.62
+east  = -80.10
+north =  25.93
+
+# One on-land point per landmass: the Miami mainland and Miami Beach (barrier island).
+[[land_refs]]
+lon = -80.20
+lat =  25.78
+[[land_refs]]
+lon = -80.13
+lat =  25.79
+
+[paths]
+osm_pbf   = "data/simami.osm.pbf"
+dem_tif   = "data/simami_dem.tif"
+output_db = "artifacts/tiles_simami.db"
+mapping_json = "artifacts/mapping_simami.json"
+
+[elevation]
+walkable_threshold_m = 1.5
+flatten_buildings    = true
+
+[collision]
+building_floor_blocked = true
+
+[atlas]
+tile_width  = 32
+tile_height = 32
+columns     = 47
+path = "assets/atlas.png"
+
+[verify]
+test_chunks = []

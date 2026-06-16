@@ -1,0 +1,601 @@
+# synth la (Los Angeles) — generated from verified civic research.
+slug = "synth_la"
+display = "synth la"
+prompt_name = "Los Angeles"
+demonym = "Angeleno"
+pumas = [3703, 3704, 3705, 3706, 3707, 3708, 3709, 3710, 3711, 3712, 3713, 3714, 3715, 3716, 3717, 3718, 3719, 3720, 3721, 3722, 3723, 3724, 3725, 3728, 3730, 3731, 3732, 3733, 3734, 3735, 3736, 3737, 3738, 3739, 3740, 3741, 3742, 3743, 3744, 3745, 3746, 3747, 3748, 3750, 3751, 3752, 3753, 3754, 3757, 3758, 3759, 3760, 3761, 3762, 3763, 3764, 3766, 3767, 3768, 3770, 3771, 3772, 3773, 3774, 3775, 3776, 3778, 3779, 3780, 3781, 3782]
+pums_path = "data/synth_la_pums.csv"
+tiles_path = "server_tiles/synth_la.db"
+religion_weights = [0.32, 0.25, 0.04, 0.27, 0.03, 0.01, 0.03, 0.01, 0.04]
+
+[politics]
+economic_base = -0.32
+social_base = -0.28
+trust_base = -0.12
+change_base = 0.18
+s_housing = 0.85
+s_crime = 0.7
+s_homeless = 0.92
+s_cost = 0.82
+s_environment = 0.55
+s_immigration = 0.62
+vote_facts = "Los Angeles County is the nation's most populous county and a Democratic stronghold: Joe Biden carried it about 71% to 27% in 2020, and Hillary Clinton ran about as strongly in 2016. The electorate is plurality Latino (roughly half the population) with very large Asian American and Black communities and one of the country's largest foreign-born populations (about a third of residents), so immigrant and working-class concerns weigh heavily and the county is somewhat more moderate and economically populist than coastal cities like San Francisco. Homelessness, housing affordability, and the cost of living are dominant local concerns, with tens of thousands of people unsheltered countywide, while public safety became a rising priority after pandemic-era increases in property crime and visible street conditions. The economy is polycentric and car-dependent, anchored by entertainment, the ports of LA and Long Beach, logistics, healthcare, aerospace, and tourism rather than a single dominant downtown."
+belief_facts = "California uses a TOP-TWO primary — the two highest vote-getters advance to the general election regardless of party, so a lone prominent minority-party candidate usually consolidates enough of the minority vote to take second place even in a heavily one-party area."
+
+[work]
+downtown_puma = 3775
+downtown_share = 0.14
+
+[[neighborhoods]]
+puma = 3703
+label = "Lancaster (Antelope Valley)"
+[[neighborhoods]]
+puma = 3704
+label = "Palmdale (Antelope Valley)"
+[[neighborhoods]]
+puma = 3705
+label = "Chatsworth / Porter Ranch (NW Valley)"
+[[neighborhoods]]
+puma = 3706
+label = "Granada Hills / Sylmar"
+[[neighborhoods]]
+puma = 3707
+label = "Arleta / Pacoima / San Fernando"
+[[neighborhoods]]
+puma = 3708
+label = "Sunland / Sun Valley / Tujunga"
+[[neighborhoods]]
+puma = 3709
+label = "North San Gabriel Valley"
+[[neighborhoods]]
+puma = 3710
+label = "Baldwin Park / Azusa / Duarte"
+[[neighborhoods]]
+puma = 3711
+label = "Glendora / Claremont / San Dimas"
+[[neighborhoods]]
+puma = 3712
+label = "Pomona"
+[[neighborhoods]]
+puma = 3713
+label = "Covina / Walnut"
+[[neighborhoods]]
+puma = 3714
+label = "Diamond Bar / Rowland Heights"
+[[neighborhoods]]
+puma = 3715
+label = "West Covina"
+[[neighborhoods]]
+puma = 3716
+label = "La Puente / Industry"
+[[neighborhoods]]
+puma = 3717
+label = "Arcadia / San Gabriel / Temple City"
+[[neighborhoods]]
+puma = 3718
+label = "Pasadena"
+[[neighborhoods]]
+puma = 3719
+label = "Glendale"
+[[neighborhoods]]
+puma = 3720
+label = "Burbank"
+[[neighborhoods]]
+puma = 3721
+label = "North Hollywood / Valley Village"
+[[neighborhoods]]
+puma = 3722
+label = "Van Nuys / Sherman Oaks"
+[[neighborhoods]]
+puma = 3723
+label = "Mission Hills / Panorama City"
+[[neighborhoods]]
+puma = 3724
+label = "Encino / Tarzana"
+[[neighborhoods]]
+puma = 3725
+label = "Canoga Park / Woodland Hills"
+[[neighborhoods]]
+puma = 3728
+label = "Santa Monica"
+[[neighborhoods]]
+puma = 3730
+label = "Hancock Park / Mid-Wilshire"
+[[neighborhoods]]
+puma = 3731
+label = "West Hollywood / Beverly Hills"
+[[neighborhoods]]
+puma = 3732
+label = "Hollywood"
+[[neighborhoods]]
+puma = 3733
+label = "Koreatown"
+[[neighborhoods]]
+puma = 3734
+label = "Silver Lake / Echo Park / Westlake"
+[[neighborhoods]]
+puma = 3735
+label = "Highland Park / Mount Washington"
+[[neighborhoods]]
+puma = 3736
+label = "Alhambra / South Pasadena"
+[[neighborhoods]]
+puma = 3737
+label = "Monterey Park / Rosemead"
+[[neighborhoods]]
+puma = 3738
+label = "El Monte / South El Monte"
+[[neighborhoods]]
+puma = 3739
+label = "Whittier / Hacienda Heights"
+[[neighborhoods]]
+puma = 3740
+label = "Pico Rivera / Montebello"
+[[neighborhoods]]
+puma = 3741
+label = "Bell / Maywood / Cudahy / Commerce"
+[[neighborhoods]]
+puma = 3742
+label = "Huntington Park / Florence-Graham"
+[[neighborhoods]]
+puma = 3743
+label = "East Los Angeles"
+[[neighborhoods]]
+puma = 3744
+label = "Downtown / Boyle Heights"
+[[neighborhoods]]
+puma = 3745
+label = "East Vernon (South Central)"
+[[neighborhoods]]
+puma = 3746
+label = "USC / Exposition Park"
+[[neighborhoods]]
+puma = 3747
+label = "West Adams / Baldwin Hills"
+[[neighborhoods]]
+puma = 3748
+label = "Marina del Rey / Westchester / Culver City"
+[[neighborhoods]]
+puma = 3750
+label = "Westmont (South Central)"
+[[neighborhoods]]
+puma = 3751
+label = "Watts (South Central)"
+[[neighborhoods]]
+puma = 3752
+label = "South Gate / Lynwood"
+[[neighborhoods]]
+puma = 3753
+label = "Downey"
+[[neighborhoods]]
+puma = 3754
+label = "La Mirada / Santa Fe Springs"
+[[neighborhoods]]
+puma = 3757
+label = "Compton"
+[[neighborhoods]]
+puma = 3758
+label = "Gardena / Lawndale / West Athens"
+[[neighborhoods]]
+puma = 3759
+label = "Hawthorne"
+[[neighborhoods]]
+puma = 3760
+label = "Redondo / Manhattan / Hermosa Beach"
+[[neighborhoods]]
+puma = 3761
+label = "Torrance"
+[[neighborhoods]]
+puma = 3762
+label = "Carson"
+[[neighborhoods]]
+puma = 3763
+label = "North Long Beach"
+[[neighborhoods]]
+puma = 3764
+label = "Lakewood / Cerritos / Artesia"
+[[neighborhoods]]
+puma = 3766
+label = "SW Long Beach / Port"
+[[neighborhoods]]
+puma = 3767
+label = "San Pedro"
+[[neighborhoods]]
+puma = 3768
+label = "Palos Verdes Peninsula"
+[[neighborhoods]]
+puma = 3770
+label = "West LA / Century City / Palms"
+[[neighborhoods]]
+puma = 3771
+label = "Santa Clarita (South)"
+[[neighborhoods]]
+puma = 3772
+label = "Castaic (North/Unincorporated)"
+[[neighborhoods]]
+puma = 3773
+label = "Santa Clarita (North)"
+[[neighborhoods]]
+puma = 3774
+label = "Calabasas / Agoura Hills / Malibu"
+[[neighborhoods]]
+puma = 3775
+label = "Downtown LA (Central / Financial District)"
+[[neighborhoods]]
+puma = 3776
+label = "Westwood / West Los Angeles"
+[[neighborhoods]]
+puma = 3778
+label = "Inglewood"
+[[neighborhoods]]
+puma = 3779
+label = "East Long Beach"
+[[neighborhoods]]
+puma = 3780
+label = "Central Long Beach / Signal Hill"
+[[neighborhoods]]
+puma = 3781
+label = "Norwalk"
+[[neighborhoods]]
+puma = 3782
+label = "Bellflower / Paramount"
+
+# PUMA -> chunk-grid centroid {cx, cy, radius_chunks}, auto-generated by
+# tools/compute_centroids.py from TIGER 2020 PUMA polygons clipped to the map
+# bbox + reprojected to this city's UTM zone. Off-map (county) PUMAs are
+# clamped to the nearest grid edge; water centroids snapped to nearest land.
+[[centroids]]
+puma = 3703
+cx = 154
+cy = 0
+radius = 7
+[[centroids]]
+puma = 3704
+cx = 169
+cy = 0
+radius = 7
+[[centroids]]
+puma = 3705
+cx = 50
+cy = 31
+radius = 16
+[[centroids]]
+puma = 3706
+cx = 63
+cy = 11
+radius = 7
+[[centroids]]
+puma = 3707
+cx = 73
+cy = 5
+radius = 7
+[[centroids]]
+puma = 3708
+cx = 101
+cy = 11
+radius = 18
+[[centroids]]
+puma = 3709
+cx = 157
+cy = 15
+radius = 16
+[[centroids]]
+puma = 3710
+cx = 170
+cy = 57
+radius = 7
+[[centroids]]
+puma = 3711
+cx = 170
+cy = 58
+radius = 7
+[[centroids]]
+puma = 3712
+cx = 170
+cy = 89
+radius = 7
+[[centroids]]
+puma = 3713
+cx = 170
+cy = 88
+radius = 7
+[[centroids]]
+puma = 3714
+cx = 170
+cy = 122
+radius = 7
+[[centroids]]
+puma = 3715
+cx = 170
+cy = 90
+radius = 7
+[[centroids]]
+puma = 3716
+cx = 170
+cy = 100
+radius = 7
+[[centroids]]
+puma = 3717
+cx = 170
+cy = 59
+radius = 7
+[[centroids]]
+puma = 3718
+cx = 167
+cy = 44
+radius = 10
+[[centroids]]
+puma = 3719
+cx = 139
+cy = 34
+radius = 18
+[[centroids]]
+puma = 3720
+cx = 114
+cy = 38
+radius = 18
+[[centroids]]
+puma = 3721
+cx = 87
+cy = 33
+radius = 13
+[[centroids]]
+puma = 3722
+cx = 65
+cy = 30
+radius = 15
+[[centroids]]
+puma = 3723
+cx = 63
+cy = 11
+radius = 13
+[[centroids]]
+puma = 3724
+cx = 43
+cy = 39
+radius = 18
+[[centroids]]
+puma = 3725
+cx = 31
+cy = 48
+radius = 16
+[[centroids]]
+puma = 3728
+cx = 52
+cy = 103
+radius = 14
+[[centroids]]
+puma = 3730
+cx = 100
+cy = 86
+radius = 15
+[[centroids]]
+puma = 3731
+cx = 89
+cy = 72
+radius = 16
+[[centroids]]
+puma = 3732
+cx = 115
+cy = 69
+radius = 14
+[[centroids]]
+puma = 3733
+cx = 120
+cy = 85
+radius = 6
+[[centroids]]
+puma = 3734
+cx = 134
+cy = 77
+radius = 15
+[[centroids]]
+puma = 3735
+cx = 155
+cy = 66
+radius = 18
+[[centroids]]
+puma = 3736
+cx = 168
+cy = 65
+radius = 9
+[[centroids]]
+puma = 3737
+cx = 169
+cy = 90
+radius = 4
+[[centroids]]
+puma = 3738
+cx = 170
+cy = 86
+radius = 7
+[[centroids]]
+puma = 3739
+cx = 170
+cy = 120
+radius = 7
+[[centroids]]
+puma = 3740
+cx = 170
+cy = 112
+radius = 7
+[[centroids]]
+puma = 3741
+cx = 164
+cy = 121
+radius = 12
+[[centroids]]
+puma = 3742
+cx = 147
+cy = 119
+radius = 16
+[[centroids]]
+puma = 3743
+cx = 164
+cy = 97
+radius = 9
+[[centroids]]
+puma = 3744
+cx = 146
+cy = 94
+radius = 16
+[[centroids]]
+puma = 3745
+cx = 133
+cy = 110
+radius = 8
+[[centroids]]
+puma = 3746
+cx = 120
+cy = 100
+radius = 8
+[[centroids]]
+puma = 3747
+cx = 101
+cy = 106
+radius = 16
+[[centroids]]
+puma = 3748
+cx = 77
+cy = 124
+radius = 18
+[[centroids]]
+puma = 3750
+cx = 119
+cy = 123
+radius = 13
+[[centroids]]
+puma = 3751
+cx = 133
+cy = 133
+radius = 12
+[[centroids]]
+puma = 3752
+cx = 156
+cy = 137
+radius = 11
+[[centroids]]
+puma = 3753
+cx = 169
+cy = 141
+radius = 4
+[[centroids]]
+puma = 3754
+cx = 171
+cy = 141
+radius = 7
+[[centroids]]
+puma = 3757
+cx = 143
+cy = 144
+radius = 7
+[[centroids]]
+puma = 3758
+cx = 118
+cy = 139
+radius = 6
+[[centroids]]
+puma = 3759
+cx = 98
+cy = 141
+radius = 7
+[[centroids]]
+puma = 3760
+cx = 32
+cy = 117
+radius = 18
+[[centroids]]
+puma = 3761
+cx = 103
+cy = 142
+radius = 7
+[[centroids]]
+puma = 3762
+cx = 133
+cy = 144
+radius = 7
+[[centroids]]
+puma = 3763
+cx = 159
+cy = 143
+radius = 7
+[[centroids]]
+puma = 3764
+cx = 171
+cy = 141
+radius = 7
+[[centroids]]
+puma = 3766
+cx = 151
+cy = 142
+radius = 7
+[[centroids]]
+puma = 3767
+cx = 125
+cy = 142
+radius = 7
+[[centroids]]
+puma = 3768
+cx = 59
+cy = 143
+radius = 7
+[[centroids]]
+puma = 3770
+cx = 74
+cy = 100
+radius = 14
+[[centroids]]
+puma = 3771
+cx = 67
+cy = 2
+radius = 7
+[[centroids]]
+puma = 3772
+cx = 139
+cy = 0
+radius = 7
+[[centroids]]
+puma = 3773
+cx = 62
+cy = 13
+radius = 7
+[[centroids]]
+puma = 3774
+cx = 27
+cy = 74
+radius = 18
+[[centroids]]
+puma = 3775
+cx = 73
+cy = 57
+radius = 18
+[[centroids]]
+puma = 3776
+cx = 66
+cy = 88
+radius = 13
+[[centroids]]
+puma = 3778
+cx = 102
+cy = 131
+radius = 11
+[[centroids]]
+puma = 3779
+cx = 171
+cy = 141
+radius = 7
+[[centroids]]
+puma = 3780
+cx = 168
+cy = 141
+radius = 7
+[[centroids]]
+puma = 3781
+cx = 171
+cy = 141
+radius = 7
+[[centroids]]
+puma = 3782
+cx = 171
+cy = 141
+radius = 7

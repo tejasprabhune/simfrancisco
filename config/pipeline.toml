@@ -1,0 +1,38 @@
+# SF Procedural RPG Tilemap Pipeline — configuration
+# All spatial values are in EPSG:32610 (UTM Zone 10N) unless noted.
+
+[pipeline]
+meters_per_cell = 2.0       # cell resolution
+chunk_meters    = 250.0     # chunk side length → 125×125 cells
+lod_levels      = 6         # LOD 0 (full) … 5 (1/32), covers whole-SF minimap
+
+# San Francisco bounding box in WGS-84 (EPSG:4326), used for osmium clipping.
+# The pipeline reprojects this to UTM 10N at startup.
+[bbox_wgs84]
+west  = -122.5247
+south =   37.6983
+east  = -122.3366
+north =   37.8312
+
+[paths]
+osm_pbf   = "data/sf.osm.pbf"
+dem_tif   = "data/sf_dem.tif"
+output_db = "tiles.db"
+mapping_json = "mapping.json"
+
+[elevation]
+walkable_threshold_m = 1.5   # max rise per 2-m cell before → cliff/stairs
+flatten_buildings    = true  # average DEM under each building footprint
+
+[collision]
+building_floor_blocked = true   # v1: agents don't enter buildings
+
+[atlas]
+# Atlas built by `cargo run --bin build_atlas`.
+# Layout: 47 columns × 13 rows at 32×32 px each (1504×416 px total).
+# Row = SemanticClass ordinal (0=Grass … 12=Shoreline).
+# Col = autotile blob variant (0-46, sorted-mask order).
+tile_width  = 32
+tile_height = 32
+columns     = 47
+path = "assets/atlas.png"

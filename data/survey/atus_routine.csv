@@ -1,0 +1,14 @@
+# source: BLS American Time Use Survey (ATUS) 2023-2024 summary tables, bls.gov/tus/ (atus_06272024 and atus.pdf). Typical weekday averages; employed reflects full-time workers (less sleep ~7.8-8.0h, less leisure ~3-4h, more work), non-employed reflect more sleep (~9h) and more leisure (~6-7.6h, highest among 65+). Middle-aged (45-54) sleep least; older groups have most leisure and least work. Wake/sleep are clock hours.
+age_band,employed,wake_hour,work_or_school_hours,leisure_hours,tv_hours,exercise_minutes,socializing_minutes,sleep_hour
+18-24,yes,7.0,7.0,3.8,2.0,28,45,23.5
+18-24,no,8.0,3.5,5.6,2.6,30,55,24.0
+25-34,yes,6.5,8.4,3.4,1.9,24,38,23.0
+25-34,no,7.5,2.0,5.4,2.7,22,48,23.5
+35-44,yes,6.3,8.6,3.1,1.8,22,32,23.0
+35-44,no,7.3,1.8,5.2,2.9,20,42,23.5
+45-54,yes,6.2,8.6,3.2,2.0,20,30,22.75
+45-54,no,7.2,1.6,5.6,3.4,19,40,23.25
+55-64,yes,6.4,8.0,3.8,2.5,21,32,22.75
+55-64,no,7.3,1.2,6.4,3.9,20,42,23.0
+65+,yes,6.8,5.5,5.0,3.2,22,35,22.5
+65+,no,7.5,0.6,7.4,4.6,24,48,22.75

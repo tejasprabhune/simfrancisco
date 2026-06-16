@@ -1,0 +1,38 @@
+{
+  "city": "cybercago",
+  "date": "2026-06-15",
+  "articles": [
+    {
+      "headline": "Susana Mendoza enters the race for Chicago mayor",
+      "summary": "The state comptroller joined the mayoral field on June 3, sharpening debates over crime, taxes and city finances.",
+      "topic": "politics",
+      "salience": "crime",
+      "url": "https://news.wttw.com/",
+      "date": "2026-06-15"
+    },
+    {
+      "headline": "Bears announce plan to move to Hammond, Indiana",
+      "summary": "The Chicago Bears unveiled plans to relocate across the state line to Hammond, Indiana, stirring civic and economic debate.",
+      "topic": "sports",
+      "salience": "cost",
+      "url": "https://chicago.suntimes.com/",
+      "date": "2026-06-15"
+    },
+    {
+      "headline": "CPD consent decree back in focus as oversight reports land",
+      "summary": "Since 2019 the Chicago Police Department has operated under a federal consent decree; new compliance scrutiny renews the public-safety debate.",
+      "topic": "safety",
+      "salience": "crime",
+      "url": "https://news.wttw.com/2026/06/11/june-11-2026-full-show",
+      "date": "2026-06-15"
+    },
+    {
+      "headline": "Storm cleanup underway as thousands remain without power",
+      "summary": "Severe storms knocked out power to thousands across the Chicago area; cleanup and restoration are ongoing.",
+      "topic": "weather",
+      "salience": "environment",
+      "url": "https://abc7chicago.com/videoClip/19305026/",
+      "date": "2026-06-15"
+    }
+  ]
+}

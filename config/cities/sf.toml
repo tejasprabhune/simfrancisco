@@ -1,0 +1,61 @@
+# sim francisco (San Francisco) — UTM Zone 10N.
+# Mirrors the original config/pipeline.toml; output goes to artifacts/ so the
+# backend's canonical root tiles.db is never clobbered by a rebuild.
+
+[pipeline]
+meters_per_cell = 2.0
+chunk_meters    = 250.0
+lod_levels      = 6
+
+[crs]
+utm_epsg = "EPSG:32610"
+
+[bbox_wgs84]
+west  = -122.5247
+south =   37.6983
+east  = -122.3366
+north =   37.8312
+
+# Twin Peaks — a reliable SF interior land point (matches the original hardcode).
+[land_ref]
+lon = -122.4477
+lat =   37.7544
+
+[paths]
+osm_pbf   = "data/sf.osm.pbf"
+dem_tif   = "data/sf_dem.tif"
+output_db = "artifacts/tiles_sf.db"
+mapping_json = "artifacts/mapping_sf.json"
+
+[elevation]
+walkable_threshold_m = 1.5
+flatten_buildings    = true
+
+[collision]
+building_floor_blocked = true
+
+[atlas]
+tile_width  = 32
+tile_height = 32
+columns     = 47
+path = "assets/atlas.png"
+
+[[landmarks]]
+name = "Twin Peaks"
+lon = -122.4477
+lat =   37.7544
+expected_m = 283.0
+
+[[landmarks]]
+name = "Embarcadero"
+lon = -122.3937
+lat =   37.7955
+expected_m = 3.0
+
+[verify]
+test_chunks = [
+  { cx = 32, cy = 34, label = "alamo" },
+  { cx = 43, cy = 43, label = "fidi" },
+  { cx = 46, cy = 43, label = "ferry" },
+  { cx = 43, cy = 35, label = "soma" },
+]

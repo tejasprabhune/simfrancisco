@@ -1,6 +1,10 @@
 target
 .git
 data/pums
+data/raw
+data/*.osm.pbf
+data/*_dem.tif
+artifacts
 runs
 cache.db
 state.db

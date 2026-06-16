@@ -1,0 +1,38 @@
+{
+  "city": "sf",
+  "date": "2026-06-15",
+  "articles": [
+    {
+      "headline": "World Cup matches kick off at the Bay Area stadium in Santa Clara",
+      "summary": "The 2026 FIFA World Cup is underway, with the Bay Area hosting six matches and free fan zones at Chase Center and PIER 39 drawing global crowds.",
+      "topic": "sports",
+      "salience": "none",
+      "url": "https://www.kqed.org/news/12086949",
+      "date": "2026-06-15"
+    },
+    {
+      "headline": "June primary decides the race to succeed Nancy Pelosi",
+      "summary": "Bay Area voters advanced two candidates in the 11th Congressional District primary to succeed the former House Speaker; turnout and cost-of-living dominated the campaign.",
+      "topic": "politics",
+      "salience": "cost",
+      "url": "https://www.nbcbayarea.com/news/local/san-francisco-june-2026-election-results/4089580/",
+      "date": "2026-06-15"
+    },
+    {
+      "headline": "SF Board of Supervisors races sharpen fights over housing and public safety",
+      "summary": "The 2026 Board of Supervisors election is centering on housing affordability, homelessness, and downtown recovery.",
+      "topic": "politics",
+      "salience": "housing",
+      "url": "https://en.wikipedia.org/wiki/2026_San_Francisco_Board_of_Supervisors_election",
+      "date": "2026-06-15"
+    },
+    {
+      "headline": "Trump marks 80th birthday touting an agreement to end the war in Iran",
+      "summary": "The president hailed an initial deal to wind down the Iran conflict that had rattled the global economy.",
+      "topic": "national",
+      "salience": "none",
+      "url": "https://www.npr.org/sections/national/",
+      "date": "2026-06-15"
+    }
+  ]
+}

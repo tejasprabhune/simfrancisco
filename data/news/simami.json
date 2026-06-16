@@ -1,0 +1,38 @@
+{
+  "city": "simami",
+  "date": "2026-06-15",
+  "articles": [
+    {
+      "headline": "Rare 6.1 earthquake off Cuba shakes South Florida",
+      "summary": "The largest Gulf of Mexico quake ever recorded by modern instruments was felt across Miami; several buildings, including the Stephen P. Clark Government Center, were evacuated.",
+      "topic": "disaster",
+      "salience": "none",
+      "url": "https://www.nbcmiami.com/news/local/strong-earthquake-off-northwest-cuba-reportedly-felt-in-florida/3818106/",
+      "date": "2026-06-15"
+    },
+    {
+      "headline": "World Cup fever takes over Miami ahead of matches in Miami Gardens",
+      "summary": "Thousands packed Bayfront Park for the FIFA Fan Fest as Miami prepares for seven World Cup matches.",
+      "topic": "sports",
+      "salience": "none",
+      "url": "https://www.cbsnews.com/miami/news/fifa-world-cup-miami-match-south-florida-june-2026/",
+      "date": "2026-06-15"
+    },
+    {
+      "headline": "Record Tri-Rail ridership as transit strains under growth",
+      "summary": "South Florida transit is reporting record ridership amid rapid growth, sharpening debates over congestion and the cost of living.",
+      "topic": "transit",
+      "salience": "cost",
+      "url": "https://www.miamitodaynews.com/",
+      "date": "2026-06-15"
+    },
+    {
+      "headline": "Miami prepares to host the 2026 G20 summit",
+      "summary": "Preparations are underway for the G20 summit in Miami, drawing global attention and heavy security planning.",
+      "topic": "politics",
+      "salience": "none",
+      "url": "https://en.wikipedia.org/wiki/2026_G20_Miami_summit",
+      "date": "2026-06-15"
+    }
+  ]
+}

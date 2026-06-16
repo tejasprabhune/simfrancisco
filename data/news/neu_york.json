@@ -1,0 +1,38 @@
+{
+  "city": "neu_york",
+  "date": "2026-06-15",
+  "articles": [
+    {
+      "headline": "Knicks win the NBA title; Mayor Mamdani announces a ticker-tape parade",
+      "summary": "The Knicks beat the Spurs in Game 5 of the Finals on June 13; the city is planning a Canyon of Heroes parade and City Hall ceremony.",
+      "topic": "sports",
+      "salience": "none",
+      "url": "https://ny1.com/nyc/all-boroughs/morning-briefing/2026/06/14/morning-briefing--june-15--2026",
+      "date": "2026-06-15"
+    },
+    {
+      "headline": "World Cup fills the NY/NJ stadium as transit and security expand",
+      "summary": "Brazil-Morocco, France-Senegal and more draw huge crowds; Gov. Hochul and the host committee tout free fan events and beefed-up transit.",
+      "topic": "sports",
+      "salience": "transit",
+      "url": "https://abc7ny.com/live-updates/2026-world-cup-live-updates-new-york-jersey/19277214/",
+      "date": "2026-06-15"
+    },
+    {
+      "headline": "State primary set for June 23 amid fights over rent and the subway",
+      "summary": "Housing affordability, rent stabilization and subway reliability are the defining issues heading into the June 23 primary.",
+      "topic": "politics",
+      "salience": "housing",
+      "url": "https://ny1.com/nyc/all-boroughs/politics/2026-nyc-elections",
+      "date": "2026-06-15"
+    },
+    {
+      "headline": "Trump touts an initial agreement to end the war in Iran",
+      "summary": "A national breakthrough on the Iran conflict that had shaken the global economy.",
+      "topic": "national",
+      "salience": "none",
+      "url": "https://www.npr.org/sections/national/",
+      "date": "2026-06-15"
+    }
+  ]
+}

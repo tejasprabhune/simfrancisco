@@ -1,0 +1,138 @@
+meta:
+  validation_n: 2000
+  default_seed: 42
+  notes: 'neu_york rubric: leakage-free gpt-4o (Oct-2023 cutoff) backtest of certified 2024 New York City
+    (five boroughs: New York, Kings, Queens, Bronx, Richmond counties) results (presidential two-party
+    + ballot measures, web-verified against two independent sources) + direction-only counterfactuals.
+    Targets are frozen certified ground truth; only persona/prompt/aggregation may be tuned.'
+weights:
+  elections_measures: 1.0
+  resolved_markets_sf_informative: 0.0
+  resolved_markets_general: 0.0
+  live_markets: 0.0
+  counterfactuals: 1.0
+thresholds:
+  weighted_score_min: 0.7
+  elections_measures_max_abs_err: 0.07
+  resolved_markets_max_brier: 0.18
+  counterfactual_direction_min: 0.8
+elections_measures:
+- id: nyc_president_2024_two_party_dem_share
+  as_of_date: '2024-11-04'
+  model: gpt-4o
+  population: cvap_likely_voter
+  question: Of votes cast for the two major-party presidential candidates in New York City, what share
+    went to Kamala Harris (Democratic) rather than Donald Trump (Republican)?
+  description: 'On Nov 5, 2024, NYC voters chose between Democrat Kamala Harris and Republican Donald
+    Trump. Heading into the election, NYC was a Democratic stronghold (Biden took ~76% in 2020), but cost-of-living
+    strain, the migrant/asylum-seeker influx straining city shelters, and discontent in immigrant and
+    outer-borough neighborhoods set up a notable Republican shift. Harris carried all boroughs except
+    Staten Island (Richmond County), which Trump won. This value is the certified two-party Democratic
+    share across all five boroughs: Harris 1,903,344 vs Trump 838,838. By county the Democratic two-party
+    share was roughly Manhattan 0.824, Bronx 0.727, Brooklyn 0.720, Queens 0.623, Staten Island 0.351.'
+  target_share: 0.6941
+  tolerance: 0.05
+- id: ny_prop_1_2024_equal_rights_amendment
+  as_of_date: '2024-11-04'
+  model: gpt-4o
+  population: cvap_likely_voter
+  question: Shall the New York Constitution's equal-protection clause be amended to also bar discrimination
+    based on ethnicity, national origin, age, disability, and sex - including sexual orientation, gender
+    identity, gender expression, pregnancy, pregnancy outcomes, and reproductive healthcare and autonomy?
+  description: 'Proposal 1 was New York''s statewide ''Equal Rights Amendment,'' widely understood as
+    enshrining abortion and reproductive-rights protections in the state constitution after the 2022 Dobbs
+    decision overturned Roe v. Wade. Backers (Hochul, most Democrats, reproductive-rights groups) framed
+    it as locking in abortion access and broad anti-discrimination protections; opponents argued the language
+    was vague and could affect parental rights and youth gender care. A YES vote adds these protections
+    to the constitution. This figure is the YES share among Yes/No votes aggregated across the five NYC
+    boroughs (certified): Yes 1,911,474, No 535,474. By borough the YES share was roughly Manhattan 0.860,
+    Bronx 0.833, Brooklyn 0.792, Queens 0.748, Staten Island 0.506.'
+  target_share: 0.7812
+  tolerance: 0.06
+- id: nyc_prop_2_2024_sanitation_cleanliness
+  as_of_date: '2024-11-04'
+  model: gpt-4o
+  population: cvap_likely_voter
+  question: Shall the City Charter be amended to expand and clarify the Department of Sanitation's power
+    to clean streets and other city property and to require that trash be set out in containers, including
+    authority over parks, medians, and street vendors?
+  description: Proposal 2 came from Mayor Eric Adams' Charter Revision Commission and tied into his high-profile
+    'war on rats' and trash-containerization push (mandatory wheelie-bin rules were rolling out across
+    the city in 2024). It would let the Department of Sanitation clean more city property, regulate how
+    residents and businesses set out garbage, and hold street vendors accountable. Supporters cast it
+    as cleaner streets and fewer rats; critics, including street-vendor advocates, warned of heavier enforcement
+    against vendors. A YES vote adopts the amendment. Value is the certified citywide YES share (NYC-only
+    measure, so the citywide figure is the five-county aggregate).
+  target_share: 0.6174
+  tolerance: 0.08
+- id: nyc_prop_4_2024_public_safety_notice
+  as_of_date: '2024-11-04'
+  model: gpt-4o
+  population: cvap_likely_voter
+  question: Shall the City Charter be amended to require additional public notice and time, including
+    a public hearing and notice to the Mayor, before the City Council votes on local laws affecting the
+    public-safety operations of the NYPD, FDNY, or Department of Correction?
+  description: Proposal 4 was one of several Adams-commission measures seen as a response to the Council's
+    recent veto-overriding public-safety bills (such as the NYPD stop-and-frisk reporting 'How Many Stops
+    Act' and a solitary-confinement ban passed over the mayor's veto in early 2024). It would add public-notice
+    and hearing requirements before the Council passes laws touching police, fire, or corrections operations.
+    Supporters framed it as transparency; critics, including many Council members, called it a mayoral
+    'power grab' that slows police oversight. A YES vote adopts the amendment. Value is the certified
+    citywide YES share (NYC-only measure = five-county aggregate).
+  target_share: 0.5707
+  tolerance: 0.08
+- id: nyc_prop_5_2024_capital_planning
+  as_of_date: '2024-11-04'
+  model: gpt-4o
+  population: cvap_likely_voter
+  question: Shall the City Charter be amended to require more regular assessment of the condition and
+    maintenance needs of city facilities and to require that those needs inform the city's capital planning?
+  description: Proposal 5, also from the Adams Charter Revision Commission, would require the city to
+    annually assess the state of its buildings, bridges, and other facilities and feed that into long-term
+    capital budgeting, aiming to reduce deferred maintenance. It was the least controversial of the commission's
+    measures, presented as good-government infrastructure planning. A YES vote adopts the amendment. Value
+    is the certified citywide YES share (NYC-only measure = five-county aggregate).
+  target_share: 0.5777
+  tolerance: 0.08
+- id: nyc_prop_6_2024_mwbe_film_permits
+  as_of_date: '2024-11-04'
+  model: gpt-4o
+  population: cvap_likely_voter
+  question: Shall the City Charter be amended to create a Chief Business Diversity Officer to support
+    Minority- and Women-Owned Business Enterprises and to authorize the Mayor to designate the office
+    that issues film permits?
+  description: Proposal 6 was the only one of the five Adams-commission charter measures that voters rejected.
+    It would have created a citywide Chief Business Diversity Officer to help Minority- and Women-Owned
+    Business Enterprises (M/WBEs) win city contracts and let the Mayor pick which office issues film/TV
+    production permits. Critics found it confusing or saw it as further centralizing power under the mayor,
+    and it narrowly failed. A YES vote would have adopted the amendment; it did NOT pass. Value is the
+    certified citywide YES share (NYC-only measure = five-county aggregate).
+  target_share: 0.4736
+  tolerance: 0.08
+resolved_markets:
+  sf_opinion_informative: []
+  general_knowledge: []
+counterfactuals:
+- id: cf_subway_crime_surge
+  as_of_date: '2023-06-01'
+  model: gpt-4o
+  framing: vote
+  population: cvap_likely_voter
+  question: Would support for tougher policing and increased police presence in the subway rise after
+    a widely covered violent crime on the system?
+  description: Would support for tougher policing and increased police presence in the subway rise after
+    a widely covered violent crime on the system?
+  event: A high-profile violent assault or shooting in the subway dominates local news for a week.
+  expected_direction: up
+- id: cf_rent_stabilization_repeal
+  as_of_date: '2023-06-01'
+  model: gpt-4o
+  framing: vote
+  population: cvap_likely_voter
+  question: Would support for a candidate fall among the city's large renter majority if that candidate
+    proposed weakening rent-stabilization protections?
+  description: Would support for a candidate fall among the city's large renter majority if that candidate
+    proposed weakening rent-stabilization protections?
+  event: A mayoral candidate publicly proposes rolling back rent-stabilization rules to encourage new
+    development.
+  expected_direction: down

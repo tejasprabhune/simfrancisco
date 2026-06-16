@@ -1,0 +1,111 @@
+meta:
+  validation_n: 2000
+  default_seed: 42
+  notes: 'cybercago rubric: leakage-free gpt-4o (Oct-2023 cutoff) backtest of certified 2024 Cook County
+    results (presidential two-party + ballot measures, web-verified against two independent sources) +
+    direction-only counterfactuals. Targets are frozen certified ground truth; only persona/prompt/aggregation
+    may be tuned.'
+weights:
+  elections_measures: 1.0
+  resolved_markets_sf_informative: 0.0
+  resolved_markets_general: 0.0
+  live_markets: 0.0
+  counterfactuals: 1.0
+thresholds:
+  weighted_score_min: 0.7
+  elections_measures_max_abs_err: 0.07
+  resolved_markets_max_brier: 0.18
+  counterfactual_direction_min: 0.8
+elections_measures:
+- id: il_president_2024_two_party_dem_cook
+  as_of_date: '2024-11-04'
+  model: gpt-4o
+  population: cvap_likely_voter
+  question: Of voters choosing between the two major-party presidential candidates in Cook County, what
+    share voted for Kamala Harris (Democrat) over Donald Trump (Republican)?
+  description: 'Cook County is the largest county in Illinois, anchored by the City of Chicago plus dozens
+    of suburbs, and is the Democratic engine of a reliably blue state. In the lived 2024 context, Chicago
+    and Cook had been solidly Democratic for decades, but Harris was widely expected to run somewhat behind
+    Biden''s 2020 margins amid lower Democratic turnout and modest Republican gains across the Chicago
+    area. A higher number means a stronger Democratic two-party margin. Certified result: Harris 1,447,821
+    vs Trump 583,852 across the full county (City of Chicago + suburban Cook combined), a two-party Democratic
+    share of 0.7126.'
+  target_share: 0.7126
+  tolerance: 0.05
+- id: il_advisory_income_tax_2024_property_tax_relief_cook
+  as_of_date: '2024-11-04'
+  model: gpt-4o
+  population: cvap_likely_voter
+  question: Should the Illinois Constitution be amended to create an additional 3% tax on income greater
+    than $1,000,000 for the purpose of dedicating funds raised to property tax relief?
+  description: 'A non-binding statewide advisory referendum (the ''millionaire tax'') placed on the November
+    2024 ballot by Democratic legislators. In the lived Cook County context, property tax bills were a
+    top grievance — Treasurer Maria Pappas had publicized double-digit median increases in many south/southwest
+    suburbs and Chicago neighborhoods — so a question promising property-tax relief funded by very high
+    earners had strong local appeal; opponents (Illinois Policy Institute, business groups) warned it
+    was a step toward ending the flat tax. YES means supporting the surcharge idea. Certified suburban
+    Cook County (Cook County Clerk): YES 657,259 / NO 367,338 = 0.6415 YES. The full-county figure including
+    the City of Chicago is estimated slightly higher (~0.66) because Chicago voted more favorably; statewide
+    certified YES was 60.79%.'
+  target_share: 0.66
+  tolerance: 0.08
+- id: il_advisory_ivf_2024_assisted_reproductive_health_cook
+  as_of_date: '2024-11-04'
+  model: gpt-4o
+  population: cvap_likely_voter
+  question: Should all medically appropriate assisted reproductive treatments, including, but not limited
+    to, in vitro fertilization, be covered by any health insurance plan in Illinois that provides coverage
+    for pregnancy benefits, without limitation on the number of treatments?
+  description: 'A non-binding statewide advisory referendum on whether insurers covering pregnancy benefits
+    should also cover IVF and other assisted-reproductive treatments. In the lived 2024 context, reproductive
+    health was highly salient nationally after the fall of Roe and the 2024 Alabama IVF ruling; Illinois
+    Democrats framed the state as a reproductive-rights haven, and the question drew broad support in
+    heavily Democratic Cook County. YES means supporting mandated IVF/ART coverage. Certified suburban
+    Cook County (Cook County Clerk): YES 796,709 / NO 224,812 = 0.7799 YES. The full-county figure including
+    Chicago is estimated marginally higher (~0.79); statewide certified YES was about 72%.'
+  target_share: 0.79
+  tolerance: 0.08
+- id: il_advisory_election_worker_2024_candidate_accountability_cook
+  as_of_date: '2024-11-04'
+  model: gpt-4o
+  population: cvap_likely_voter
+  question: Should any candidate appearing on the Illinois ballot for federal, State, or local office
+    be subject to civil penalties if the candidate interferes or attempts to interfere with an election
+    worker's official duties?
+  description: 'A non-binding statewide advisory referendum on penalizing candidates who interfere with
+    election workers. In the lived 2024 context — following post-2020 threats against election officials
+    and intense national focus on election administration — this was the least controversial of the three
+    questions and passed overwhelmingly. YES means supporting civil penalties for candidate interference.
+    Certified suburban Cook County (Cook County Clerk): YES 926,390 / NO 99,713 = 0.9028 YES. The full-county
+    figure including Chicago is estimated similar or slightly higher (~0.91); statewide certified YES
+    was near 89%.'
+  target_share: 0.91
+  tolerance: 0.08
+resolved_markets:
+  sf_opinion_informative: []
+  general_knowledge: []
+counterfactuals:
+- id: cf_property_tax_relief_funding
+  as_of_date: '2023-06-01'
+  model: gpt-4o
+  framing: vote
+  population: cvap_likely_voter
+  question: Would Cook County support for a state measure rise if it dedicated new revenue specifically
+    to cutting high local property taxes?
+  description: Would Cook County support for a state measure rise if it dedicated new revenue specifically
+    to cutting high local property taxes?
+  event: A ballot measure is framed as raising taxes only on incomes over $1 million and earmarking the
+    proceeds for property-tax relief, addressing a top local cost-of-living grievance.
+  expected_direction: up
+- id: cf_crime_spike_tough_on_crime
+  as_of_date: '2023-06-01'
+  model: gpt-4o
+  framing: vote
+  population: cvap_likely_voter
+  question: Would support for a progressive, divert-funds-from-policing candidate fall after a salient
+    surge in violent crime?
+  description: Would support for a progressive, divert-funds-from-policing candidate fall after a salient
+    surge in violent crime?
+  event: A widely publicized spike in shootings and carjackings dominates local news in the weeks before
+    the election, raising the salience of public safety.
+  expected_direction: down

@@ -1,0 +1,75 @@
+[package]
+name = "sim-maps"
+version = "0.1.0"
+edition = "2021"
+description = "OSM/DEM -> procedural pixel-tile map pipeline for sim francisco cities"
+
+[lib]
+name = "sim_maps"
+path = "src/lib.rs"
+
+[[bin]]
+name = "pipeline"
+path = "src/main.rs"
+
+[[bin]]
+name = "build_atlas"
+path = "src/bin/build_atlas.rs"
+
+[[bin]]
+name = "demo_pngs"
+path = "src/bin/demo_pngs.rs"
+
+[[bin]]
+name = "export_map"
+path = "src/bin/export_map.rs"
+
+[[bin]]
+name = "build_facade_atlas"
+path = "src/bin/build_facade_atlas.rs"
+
+[[bin]]
+name = "verify"
+path = "src/bin/verify.rs"
+
+[dependencies]
+# Core parallelism
+rayon = "1.10"
+
+# Geometry / spatial
+geo = "0.28"
+geo-types = "0.7"
+proj = "0.27"
+
+# OSM ingestion
+osmpbf = "0.3"
+
+# SQLite
+rusqlite = { version = "0.31", features = ["bundled"] }
+
+# Compression
+zstd = "0.13"
+
+# Serialization (manifest JSON only)
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+# CLI / config
+clap = { version = "4", features = ["derive"] }
+toml = "0.8"
+
+# Logging
+log = "0.4"
+env_logger = "0.11"
+
+# Error handling
+anyhow = "1"
+thiserror = "1"
+
+# PNG debug output
+image = "0.25"
+# GeoTIFF reading (also a transitive dep of image, pinned here for direct use)
+tiff = "0.11"
+
+[dev-dependencies]
+tempfile = "3"

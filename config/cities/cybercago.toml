@@ -1,0 +1,42 @@
+# cybercago (Chicago) — UTM Zone 16N.
+
+[pipeline]
+meters_per_cell = 2.0
+chunk_meters    = 250.0
+lod_levels      = 6
+
+[crs]
+utm_epsg = "EPSG:32616"
+
+[bbox_wgs84]
+west  = -87.85
+south =  41.64
+east  = -87.52
+north =  42.02
+
+# The Loop — downtown Chicago mainland (Lake Michigan to the east is water).
+[land_ref]
+lon = -87.63
+lat =  41.88
+
+[paths]
+osm_pbf   = "data/cybercago.osm.pbf"
+dem_tif   = "data/cybercago_dem.tif"
+output_db = "artifacts/tiles_cybercago.db"
+mapping_json = "artifacts/mapping_cybercago.json"
+
+[elevation]
+walkable_threshold_m = 1.5
+flatten_buildings    = true
+
+[collision]
+building_floor_blocked = true
+
+[atlas]
+tile_width  = 32
+tile_height = 32
+columns     = 47
+path = "assets/atlas.png"
+
+[verify]
+test_chunks = []

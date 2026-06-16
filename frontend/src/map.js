@@ -150,6 +150,28 @@ export class SFMap {
   // legacy hook from the old vector map — the pixel base replaces the outline.
   setOutline() {}
 
+  // Swap the city: load a new base tile image (MAP.base/MAP.bbox are already
+  // updated by the caller) and rebuild the land mask + overview around it. Agents
+  // are cleared so they don't linger on the old map until the caller re-seeds them.
+  setBase(src) {
+    this.agents = [];
+    this.clearVerdicts();
+    this.bubbleIdx = [];
+    this.baseReady = false;
+    this.landMask = null;
+    this.landBox = null;
+    const img = new Image();
+    img.onload = () => {
+      this.base = img;
+      this.imgW = img.naturalWidth; this.imgH = img.naturalHeight;
+      this.baseReady = true;
+      this._fitOverview(true);
+      this._buildLandMask();
+    };
+    img.onerror = () => { console.warn("city tiles failed to load:", src); };
+    img.src = src;
+  }
+
   // shims used by app.js: verdict field sizing + offline fallback scatter.
   get proj() {
     return {

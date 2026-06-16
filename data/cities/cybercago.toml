@@ -1,0 +1,324 @@
+# cybercago (Chicago) — generated from verified civic research.
+slug = "cybercago"
+display = "cybercago"
+prompt_name = "Chicago"
+demonym = "Chicagoan"
+pumas = [3101, 3102, 3103, 3104, 3105, 3106, 3107, 3108, 3109, 3110, 3111, 3112, 3113, 3114, 3115, 3116, 3117, 3118, 3151, 3152, 3153, 3154, 3155, 3156, 3157, 3158, 3159, 3160, 3161, 3162, 3163, 3164, 3165, 3166, 3167, 3168]
+pums_path = "data/cybercago_pums.csv"
+tiles_path = "server_tiles/cybercago.db"
+religion_weights = [0.29, 0.27, 0.03, 0.31, 0.02, 0.03, 0.01, 0.01, 0.03]
+
+[politics]
+# Baseline mean lean calibrated to the presidential anchor: Cook County certified
+# 2024 two-party Democratic share is 0.713 (more Democratic than NYC's 0.694), so
+# the baseline is set at least as progressive as NYC's (-0.32/-0.30).
+economic_base = -0.36
+social_base = -0.30
+trust_base = -0.08
+change_base = 0.08
+s_housing = 0.5
+s_crime = 0.62
+s_homeless = 0.4
+s_cost = 0.6
+s_environment = 0.42
+s_immigration = 0.45
+vote_facts = "Cook County is the urban core of metropolitan Chicago and one of the most reliably Democratic large counties in the country, giving Joe Biden roughly 74% of the two-party vote in 2020 and Hillary Clinton a similar margin in 2016. The electorate is large and racially diverse, with sizable Black and Latino populations, a deep labor-union tradition (the Chicago Teachers Union and SEIU are major forces), and a strong Catholic and Black-Protestant religious presence alongside a growing unaffiliated share. Crime and public safety, high property taxes and overall cost of living, neighborhood disinvestment on the South and West Sides, and immigration (Chicago is a long-standing sanctuary city that began receiving busloads of migrants in 2022) are the issues that run hottest. The 2023 mayoral race, won by progressive Brandon Johnson over the more crime-focused Paul Vallas after incumbent Lori Lightfoot was eliminated in the first round, exposed durable splits between progressive lakefront and North Side wards and more moderate, working-class Black and white ethnic neighborhoods."
+belief_facts = "Illinois holds open partisan primaries; Chicago's municipal elections are officially nonpartisan, going to an April runoff if no candidate clears 50% in the first round."
+
+[work]
+downtown_puma = 3160
+downtown_share = 0.45
+
+[[neighborhoods]]
+puma = 3101
+label = "NW suburbs: Palatine & Barrington"
+[[neighborhoods]]
+puma = 3102
+label = "NW suburbs: Hanover & Schaumburg (NW)"
+[[neighborhoods]]
+puma = 3103
+label = "NW suburbs: Schaumburg Twp (S & E)"
+[[neighborhoods]]
+puma = 3104
+label = "NW suburbs: Elk Grove & Wheeling (SW)"
+[[neighborhoods]]
+puma = 3105
+label = "North suburbs: Wheeling Twp (N & E)"
+[[neighborhoods]]
+puma = 3106
+label = "North Shore: Northfield & New Trier"
+[[neighborhoods]]
+puma = 3107
+label = "Evanston & Niles (East)"
+[[neighborhoods]]
+puma = 3108
+label = "Near NW suburbs: Maine & Niles (West)"
+[[neighborhoods]]
+puma = 3109
+label = "West suburbs: Leyden & Norwood Park Twps"
+[[neighborhoods]]
+puma = 3110
+label = "West suburbs: Proviso (N & W)"
+[[neighborhoods]]
+puma = 3111
+label = "Oak Park, Riverside & River Forest"
+[[neighborhoods]]
+puma = 3112
+label = "Cicero & Berwyn"
+[[neighborhoods]]
+puma = 3113
+label = "SW suburbs: Lyons & Stickney"
+[[neighborhoods]]
+puma = 3114
+label = "South suburbs: Worth & Calumet Twps"
+[[neighborhoods]]
+puma = 3115
+label = "SW suburbs: Palos, Lemont & Orland (N & W)"
+[[neighborhoods]]
+puma = 3116
+label = "South suburbs: Bremen & Orland (East)"
+[[neighborhoods]]
+puma = 3117
+label = "South suburbs: Thornton Twp"
+[[neighborhoods]]
+puma = 3118
+label = "Far south suburbs: Bloom & Rich Twps"
+[[neighborhoods]]
+puma = 3151
+label = "NW Side: Albany Park, Norwood Park & O'Hare"
+[[neighborhoods]]
+puma = 3152
+label = "North Side: West Ridge, Lincoln Square & North Center"
+[[neighborhoods]]
+puma = 3153
+label = "North Side: Uptown, Edgewater & Rogers Park"
+[[neighborhoods]]
+puma = 3154
+label = "Lake View & Lincoln Park"
+[[neighborhoods]]
+puma = 3155
+label = "NW Side: Logan Square, Irving Park & Avondale"
+[[neighborhoods]]
+puma = 3156
+label = "NW Side: Portage Park, Dunning & Jefferson Park"
+[[neighborhoods]]
+puma = 3157
+label = "West Side: Belmont Cragin, Humboldt Park & Hermosa"
+[[neighborhoods]]
+puma = 3158
+label = "West Side: Austin, North Lawndale & Garfield Park"
+[[neighborhoods]]
+puma = 3159
+label = "West Town & Near West Side"
+[[neighborhoods]]
+puma = 3160
+label = "Central: Near North Side, the Loop & Near South Side"
+[[neighborhoods]]
+puma = 3161
+label = "Mid-South: Hyde Park, Kenwood, Woodlawn & Bronzeville"
+[[neighborhoods]]
+puma = 3162
+label = "SW Side: Bridgeport, McKinley Park & Lower West Side"
+[[neighborhoods]]
+puma = 3163
+label = "SW Side: South Lawndale (Little Village), Brighton Park & Gage Park"
+[[neighborhoods]]
+puma = 3164
+label = "SW Side: Ashburn, Garfield Ridge & Clearing"
+[[neighborhoods]]
+puma = 3165
+label = "South Side: Chicago Lawn, Greater Grand Crossing & Englewood"
+[[neighborhoods]]
+puma = 3166
+label = "Far SW Side: Auburn Gresham, Morgan Park & Beverly"
+[[neighborhoods]]
+puma = 3167
+label = "Far South Side: Roseland, Chatham & West Pullman"
+[[neighborhoods]]
+puma = 3168
+label = "SE Side: South Shore, South Chicago & East Side"
+
+# PUMA -> chunk-grid centroid {cx, cy, radius_chunks}, auto-generated by
+# tools/compute_centroids.py from TIGER 2020 PUMA polygons clipped to the map
+# bbox + reprojected to this city's UTM zone. Off-map (county) PUMAs are
+# clamped to the nearest grid edge; water centroids snapped to nearest land.
+[[centroids]]
+puma = 3101
+cx = 3
+cy = 3
+radius = 7
+[[centroids]]
+puma = 3102
+cx = 3
+cy = 3
+radius = 7
+[[centroids]]
+puma = 3103
+cx = 3
+cy = 3
+radius = 7
+[[centroids]]
+puma = 3104
+cx = 3
+cy = 3
+radius = 7
+[[centroids]]
+puma = 3105
+cx = 3
+cy = 3
+radius = 7
+[[centroids]]
+puma = 3106
+cx = 94
+cy = 47
+radius = 18
+[[centroids]]
+puma = 3107
+cx = 40
+cy = 5
+radius = 13
+[[centroids]]
+puma = 3108
+cx = 13
+cy = 5
+radius = 10
+[[centroids]]
+puma = 3109
+cx = 10
+cy = 32
+radius = 15
+[[centroids]]
+puma = 3110
+cx = 5
+cy = 64
+radius = 10
+[[centroids]]
+puma = 3111
+cx = 14
+cy = 68
+radius = 16
+[[centroids]]
+puma = 3112
+cx = 27
+cy = 78
+radius = 10
+[[centroids]]
+puma = 3113
+cx = 17
+cy = 109
+radius = 18
+[[centroids]]
+puma = 3114
+cx = 39
+cy = 149
+radius = 18
+[[centroids]]
+puma = 3115
+cx = 9
+cy = 148
+radius = 15
+[[centroids]]
+puma = 3116
+cx = 34
+cy = 168
+radius = 13
+[[centroids]]
+puma = 3117
+cx = 65
+cy = 160
+radius = 14
+[[centroids]]
+puma = 3118
+cx = 62
+cy = 168
+radius = 7
+[[centroids]]
+puma = 3151
+cx = 26
+cy = 17
+radius = 18
+[[centroids]]
+puma = 3152
+cx = 55
+cy = 18
+radius = 13
+[[centroids]]
+puma = 3153
+cx = 65
+cy = 16
+radius = 12
+[[centroids]]
+puma = 3154
+cx = 68
+cy = 39
+radius = 11
+[[centroids]]
+puma = 3155
+cx = 48
+cy = 37
+radius = 13
+[[centroids]]
+puma = 3156
+cx = 24
+cy = 28
+radius = 15
+[[centroids]]
+puma = 3157
+cx = 35
+cy = 46
+radius = 15
+[[centroids]]
+puma = 3158
+cx = 37
+cy = 61
+radius = 18
+[[centroids]]
+puma = 3159
+cx = 61
+cy = 60
+radius = 12
+[[centroids]]
+puma = 3160
+cx = 76
+cy = 62
+radius = 13
+[[centroids]]
+puma = 3161
+cx = 81
+cy = 97
+radius = 15
+[[centroids]]
+puma = 3162
+cx = 64
+cy = 86
+radius = 12
+[[centroids]]
+puma = 3163
+cx = 49
+cy = 88
+radius = 13
+[[centroids]]
+puma = 3164
+cx = 38
+cy = 108
+radius = 18
+[[centroids]]
+puma = 3165
+cx = 65
+cy = 111
+radius = 15
+[[centroids]]
+puma = 3166
+cx = 60
+cy = 137
+radius = 18
+[[centroids]]
+puma = 3167
+cx = 71
+cy = 133
+radius = 18
+[[centroids]]
+puma = 3168
+cx = 75
+cy = 121
+radius = 18

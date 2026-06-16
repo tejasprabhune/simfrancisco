@@ -1,0 +1,38 @@
+{
+  "city": "synth_la",
+  "date": "2026-06-15",
+  "articles": [
+    {
+      "headline": "LA mayoral race heads to a November runoff against Mayor Bass",
+      "summary": "With ~23% county turnout, Spencer Pratt and Nithya Raman are the likeliest challengers to incumbent Mayor Karen Bass; eight City Council seats were on the ballot.",
+      "topic": "politics",
+      "salience": "housing",
+      "url": "https://en.wikipedia.org/wiki/2026_Los_Angeles_mayoral_election",
+      "date": "2026-06-15"
+    },
+    {
+      "headline": "World Cup comes to SoFi Stadium with fan zones across the city",
+      "summary": "LA co-hosts the tournament with games at SoFi and fan events at the Coliseum, Union Station and the Original Farmers Market.",
+      "topic": "sports",
+      "salience": "none",
+      "url": "https://www.discoverlosangeles.com/things-to-do/the-best-of-los-angeles-in-2026",
+      "date": "2026-06-15"
+    },
+    {
+      "headline": "DATALAND, the first Museum of AI Arts, opens in Downtown LA",
+      "summary": "Refik Anadol Studio opens DATALAND at the Gehry-designed Grand LA, a marquee addition to the downtown cultural scene.",
+      "topic": "culture",
+      "salience": "none",
+      "url": "https://lamag.com/arts-and-entertainment/june-2026-los-angeles-guide-l/",
+      "date": "2026-06-15"
+    },
+    {
+      "headline": "Homelessness and housing costs dominate the City Council contests",
+      "summary": "Council and school-board races turn on homelessness response, housing supply and affordability across LA County.",
+      "topic": "politics",
+      "salience": "homelessness",
+      "url": "https://www.nbclosangeles.com/news/local/california-june-primary-election-live-updates/3899618/",
+      "date": "2026-06-15"
+    }
+  ]
+}

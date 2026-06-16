@@ -1,0 +1,48 @@
+# neu york (New York City) — UTM Zone 18N.
+
+[pipeline]
+meters_per_cell = 2.0
+chunk_meters    = 250.0
+lod_levels      = 6
+
+[crs]
+utm_epsg = "EPSG:32618"
+
+[bbox_wgs84]
+west  = -74.05
+south =  40.55
+east  = -73.70
+north =  40.92
+
+# One on-land point per landmass: Manhattan, Long Island (Brooklyn + Queens), the Bronx.
+[[land_refs]]
+lon = -73.97
+lat =  40.78
+[[land_refs]]
+lon = -73.92
+lat =  40.68
+[[land_refs]]
+lon = -73.87
+lat =  40.85
+
+[paths]
+osm_pbf   = "data/neu_york.osm.pbf"
+dem_tif   = "data/neu_york_dem.tif"
+output_db = "artifacts/tiles_neu_york.db"
+mapping_json = "artifacts/mapping_neu_york.json"
+
+[elevation]
+walkable_threshold_m = 1.5
+flatten_buildings    = true
+
+[collision]
+building_floor_blocked = true
+
+[atlas]
+tile_width  = 32
+tile_height = 32
+columns     = 47
+path = "assets/atlas.png"
+
+[verify]
+test_chunks = []

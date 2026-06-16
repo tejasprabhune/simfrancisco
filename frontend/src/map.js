@@ -23,6 +23,11 @@ const SHEET = { blockW: 48, blockH: 64, cell: 16, perRow: 5, nChars: 10 };
 const WALK = [1, 0, 1, 2];      // contact-pass-contact-pass
 const WALK_FPS = 8;
 const SPRITE_WORLD = 22;        // sprite footprint in world px (~one 2 m cell ×~)
+// Keep the overview zoomed in enough that residents render as small sprites, not
+// the square overview-LOD (which kicks in below ~9 on-screen px). Bigger cities
+// have much larger tile images, so their fit-to-screen zoom would otherwise fall
+// into squares; this floor makes every city open like SF — small walking sprites.
+const OVERVIEW_SPRITE_PX = 10;
 // overview-LOD colors (one per character) so the zoomed-out crowd still reads as varied
 const CHAR_COLORS = ["#c64f3f", "#3f72c6", "#46a35a", "#8a5fbf", "#caa23c", "#cf6aa0", "#3fb5b0", "#b5713f", "#5a6470", "#d0823f"];
 
@@ -323,10 +328,12 @@ export class SFMap {
     if (this.landBox) return { x: (this.landBox.minX + this.landBox.maxX) / 2, y: (this.landBox.minY + this.landBox.maxY) / 2 };
     return { x: this.imgW / 2, y: this.imgH / 2 };
   }
-  _minZoom() { return this._fitZoom(); }
+  // overview zoom = fit-to-screen, but never so far out that sprites become squares
+  _overviewZoom() { return Math.max(this._fitZoom(), OVERVIEW_SPRITE_PX / SPRITE_WORLD); }
+  _minZoom() { return this._overviewZoom(); }
 
   _fitOverview(snap) {
-    const z = this._fitZoom();
+    const z = this._overviewZoom();
     const c = this._fitCenter();
     this.camTarget = { x: c.x, y: c.y, zoom: z };
     this.zoomedIn = false;
@@ -431,6 +438,24 @@ export class SFMap {
     };
     c.addEventListener("pointerup", end);
     c.addEventListener("pointercancel", end);
+
+    // Trackpad pinch (a wheel event with ctrlKey) + mouse wheel / two-finger
+    // scroll → zoom around the cursor, mirroring the touch-pinch behavior.
+    c.addEventListener("wheel", (e) => {
+      e.preventDefault();
+      const r = rect();
+      const mx = e.clientX - r.left, my = e.clientY - r.top;
+      const wb = this.screenToWorld(mx, my);                    // world point under cursor (before)
+      const k = e.ctrlKey ? 0.012 : 0.0022;                     // pinch is finer than a wheel notch
+      const z = Math.min(4.0, Math.max(this._minZoom(), this.camTarget.zoom * Math.exp(-e.deltaY * k)));
+      this.cam.zoom = z; this.camTarget.zoom = z;
+      const wa = this.screenToWorld(mx, my);                    // same point under cursor (after)
+      this.camTarget.x += wb.x - wa.x; this.camTarget.y += wb.y - wa.y;   // keep it pinned under the cursor
+      this.camTarget = this._clamped(this.camTarget);
+      this.cam.x = this.camTarget.x; this.cam.y = this.camTarget.y;
+      const zi = z > this._minZoom() * 1.4;
+      if (zi !== this.zoomedIn) { this.zoomedIn = zi; this.onZoomChange && this.onZoomChange(zi); }
+    }, { passive: false });
   }
 
   // nearest character under a screen point (only when sprites are big enough to tap)
